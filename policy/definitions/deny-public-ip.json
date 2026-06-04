@@ -1,24 +1,42 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2020-09-01/policyDefinition.json#",
   "properties": {
-    "displayName": "TODO: Deny public IP addresses",
-    "description": "Placeholder policy definition. Add the Azure Policy rule before deployment.",
+    "displayName": "AZZT - Deny public IP address resources",
+    "policyType": "Custom",
+    "description": "Audits or denies Microsoft.Network/publicIPAddresses resources so workloads stay on private connectivity patterns.",
     "mode": "All",
     "metadata": {
-      "version": "0.1.0",
-      "category": "Security",
-      "cisControl": "TODO"
+      "version": "1.0.0",
+      "category": "Network Security",
+      "source": "azure-zerotrust-pipeline",
+      "cisControls": [
+        "CIS Microsoft Azure Foundations Benchmark v2.0.0 - Network exposure reduction custom control",
+        "Supports private endpoint recommendations such as CIS 3.10 and CIS 8.7"
+      ]
     },
-    "parameters": {},
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Audit first, then switch to deny after validating expected exceptions."
+        },
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "defaultValue": "audit"
+      }
+    },
     "policyRule": {
       "if": {
         "field": "type",
-        "equals": "TODO"
+        "equals": "Microsoft.Network/publicIPAddresses"
       },
       "then": {
-        "effect": "audit"
+        "effect": "[parameters('effect')]"
       }
     }
   }
 }
-

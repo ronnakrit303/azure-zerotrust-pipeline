@@ -1,24 +1,82 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2020-09-01/policyDefinition.json#",
   "properties": {
-    "displayName": "TODO: Require HTTPS",
-    "description": "Placeholder policy definition. Add the Azure Policy rule before deployment.",
+    "displayName": "AZZT - Require HTTPS for supported services",
+    "policyType": "Custom",
+    "description": "Audits or denies supported Azure services when HTTPS-only traffic is not enabled. Covers Storage secure transfer and App Service HTTPS-only settings.",
     "mode": "All",
     "metadata": {
-      "version": "0.1.0",
+      "version": "1.0.0",
       "category": "Security",
-      "cisControl": "TODO"
+      "source": "azure-zerotrust-pipeline",
+      "cisControls": [
+        "CIS Microsoft Azure Foundations Benchmark v2.0.0 recommendation 3.1",
+        "CIS Microsoft Azure Foundations Benchmark v2.0.0 recommendation 9.2"
+      ]
     },
-    "parameters": {},
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Audit first, then switch to deny after validating expected exceptions."
+        },
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "defaultValue": "audit"
+      }
+    },
     "policyRule": {
       "if": {
-        "field": "type",
-        "equals": "TODO"
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Storage/storageAccounts"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly",
+                    "exists": "false"
+                  },
+                  {
+                    "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly",
+                    "equals": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Web/sites"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Web/sites/httpsOnly",
+                    "exists": "false"
+                  },
+                  {
+                    "field": "Microsoft.Web/sites/httpsOnly",
+                    "equals": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "then": {
-        "effect": "audit"
+        "effect": "[parameters('effect')]"
       }
     }
   }
 }
-

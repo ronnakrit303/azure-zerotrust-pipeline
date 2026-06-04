@@ -1,5 +1,6 @@
 # Generated Bicep / ARM artifacts
 infra/**/*.json
+policy/main.json
 *.bicep.json
 
 # Local Azure and cloud tooling state
