@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS test
+FROM python:3.12-alpine AS test
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY tests ./tests
 
 RUN python -m unittest discover -s tests -v
 
-FROM python:3.12-slim AS runtime
+FROM python:3.12-alpine AS runtime
 
 WORKDIR /app
 
@@ -22,8 +22,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     APP_HOST=0.0.0.0 \
     APP_PORT=8080
 
-RUN groupadd --system app && \
-    useradd --system --gid app --home-dir /app app
+RUN addgroup -S app && \
+    adduser -S -G app -h /app app
 
 COPY --from=test /app/src ./src
 
