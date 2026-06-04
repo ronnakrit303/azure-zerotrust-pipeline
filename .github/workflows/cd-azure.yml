@@ -24,6 +24,7 @@ on:
       - main
     paths:
       - infra/**
+      - .github/workflows/cd-azure.yml
       - pipeline/.github/workflows/cd-azure.yml
 
 permissions:

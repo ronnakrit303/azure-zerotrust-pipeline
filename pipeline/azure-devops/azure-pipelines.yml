@@ -1,3 +1,226 @@
-# Azure DevOps pipeline placeholder.
-# TODO: Add security gates, approval checks, and Azure deployment stages.
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - app/**
+      - infra/**
+      - pipeline/**
+      - policy/**
+      - sentinel/**
 
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - app/**
+      - infra/**
+      - pipeline/**
+      - policy/**
+      - sentinel/**
+
+parameters:
+  - name: environment
+    displayName: Deployment environment
+    type: string
+    default: dev
+    values:
+      - dev
+      - prod
+  - name: deploy
+    displayName: Deploy after validation
+    type: boolean
+    default: false
+
+variables:
+  azureLocation: southeastasia
+  azureServiceConnection: sc-azure-zerotrust-oidc
+  gitleaksVersion: '8.30.1'
+
+stages:
+  - stage: Secrets
+    displayName: Secrets / Gitleaks
+    jobs:
+      - job: Gitleaks
+        displayName: Run Gitleaks first
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+            fetchDepth: 0
+
+          - script: |
+              docker run --rm \
+                -v "$(Build.SourcesDirectory):/repo" \
+                zricethezav/gitleaks:v$(gitleaksVersion) detect \
+                  --source /repo \
+                  --config /repo/.gitleaks.toml \
+                  --no-git \
+                  --redact \
+                  --verbose
+            displayName: Gitleaks secret scan
+
+  - stage: SAST
+    displayName: SAST / Semgrep
+    dependsOn: Secrets
+    jobs:
+      - job: Semgrep
+        displayName: Run Semgrep OWASP and secrets rules
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+
+          - script: |
+              docker run --rm \
+                -v "$(Build.SourcesDirectory):/src" \
+                -w /src \
+                semgrep/semgrep:latest semgrep scan \
+                  --config p/owasp-top-ten \
+                  --config p/secrets \
+                  --error \
+                  --metrics=off \
+                  .
+            displayName: Semgrep SAST
+
+  - stage: Container
+    displayName: Container / Trivy
+    dependsOn: SAST
+    jobs:
+      - job: Trivy
+        displayName: Run Trivy container scan
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+
+          - script: |
+              set -euo pipefail
+
+              if grep -Eq '^[[:space:]]*FROM[[:space:]]+' app/Dockerfile; then
+                docker build --pull --tag azure-zerotrust-app:$(Build.SourceVersion) app
+                docker run --rm \
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  -v "$(Build.SourcesDirectory):/repo" \
+                  -w /repo \
+                  aquasec/trivy:latest image \
+                    --config trivy.yaml \
+                    --severity CRITICAL \
+                    --exit-code 1 \
+                    azure-zerotrust-app:$(Build.SourceVersion)
+              else
+                echo "Dockerfile has no FROM instruction yet; running filesystem scan instead."
+                docker run --rm \
+                  -v "$(Build.SourcesDirectory):/repo" \
+                  -w /repo \
+                  aquasec/trivy:latest fs \
+                    --config trivy.yaml \
+                    --scanners vuln,secret,misconfig \
+                    --severity CRITICAL \
+                    --exit-code 1 \
+                    app
+              fi
+            displayName: Trivy critical CVE gate
+
+  - stage: IaC
+    displayName: IaC / Checkov
+    dependsOn: Container
+    jobs:
+      - job: Checkov
+        displayName: Run Checkov advisory scan
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+
+          - script: |
+              docker run --rm \
+                -v "$(Build.SourcesDirectory):/repo" \
+                -w /repo \
+                bridgecrew/checkov:latest \
+                  --directory infra \
+                  --framework bicep \
+                  --output cli \
+                  --soft-fail
+            displayName: Checkov Bicep scan
+            continueOnError: true
+
+  - stage: MSDO
+    displayName: Defender for DevOps / MSDO
+    dependsOn: IaC
+    jobs:
+      - job: MicrosoftSecurityDevOps
+        displayName: Run Microsoft Security DevOps
+        pool:
+          vmImage: windows-latest
+        steps:
+          - checkout: self
+
+          - task: MicrosoftSecurityDevOps@1
+            displayName: Microsoft Security DevOps
+            inputs:
+              policy: GitHub
+              categories: code,artifacts,IaC,containers
+
+  - stage: ValidateAzure
+    displayName: Validate Azure deployment
+    dependsOn: MSDO
+    jobs:
+      - job: Bicep
+        displayName: Build Bicep and run what-if
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+
+          - task: AzureCLI@2
+            displayName: Bicep build and subscription what-if
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
+
+                az bicep build --file infra/main.bicep
+                az bicep build-params --file infra/parameters/${{ parameters.environment }}.bicepparam --stdout > /dev/null
+
+                az deployment sub what-if \
+                  --name zt-${{ parameters.environment }}-$(Build.BuildId) \
+                  --location "$(azureLocation)" \
+                  --template-file infra/main.bicep \
+                  --parameters infra/parameters/${{ parameters.environment }}.bicepparam
+
+  - stage: DeployAzure
+    displayName: Deploy Azure
+    dependsOn: ValidateAzure
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), ${{ parameters.deploy }})
+    jobs:
+      - deployment: DeployBicep
+        displayName: Deploy subscription Bicep
+        pool:
+          vmImage: ubuntu-latest
+        environment: azure-${{ parameters.environment }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: AzureCLI@2
+                  displayName: Azure deployment
+                  inputs:
+                    azureSubscription: $(azureServiceConnection)
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      set -euo pipefail
+
+                      az deployment sub create \
+                        --name zt-${{ parameters.environment }}-$(Build.BuildId) \
+                        --location "$(azureLocation)" \
+                        --template-file infra/main.bicep \
+                        --parameters infra/parameters/${{ parameters.environment }}.bicepparam
