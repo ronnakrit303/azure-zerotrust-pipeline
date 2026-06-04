@@ -1,0 +1,57 @@
+# Generated Bicep / ARM artifacts
+infra/**/*.json
+*.bicep.json
+
+# Local Azure and cloud tooling state
+.azure/
+.azcopy/
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+*.secret
+*.secrets
+*.key
+*.pem
+*.pfx
+*.p12
+*.cer
+*.crt
+*.jks
+*.keystore
+
+# Logs, reports, and temporary files
+*.log
+logs/
+tmp/
+temp/
+.cache/
+coverage/
+test-results/
+
+# Application dependencies and build output
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
