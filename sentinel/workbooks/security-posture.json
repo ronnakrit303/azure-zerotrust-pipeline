@@ -1,8 +1,126 @@
 {
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
   "version": "Notebook/1.0",
-  "items": [],
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Azure Zero Trust Security Posture\n\nOperational workbook for the azure-zerotrust-pipeline Microsoft Sentinel lab. Use it to triage identity movement, privilege changes, Key Vault access pressure, and active Sentinel alerts."
+      },
+      "name": "title"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "time-range",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "isRequired": true,
+            "label": "Time range",
+            "value": {
+              "durationMs": 86400000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 43200000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                }
+              ],
+              "allowCustom": true
+            }
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "parameters"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "datatable(Control:string, RuleFile:string, DataSource:string, DefaultSeverity:string)\n[\n  'Password-spray followed by successful sign-in', 'sentinel/detection-rules/lateral-movement.kql', 'SigninLogs', 'Medium/High',\n  'Privileged role or consent change', 'sentinel/detection-rules/privilege-escalation.kql', 'AuditLogs', 'Medium/High',\n  'High-volume Key Vault sensitive object access', 'sentinel/detection-rules/secrets-exfiltration.kql', 'AzureDiagnostics / AzureActivity', 'Medium/High'\n]",
+        "size": 1,
+        "title": "Detection coverage",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "name": "detection-coverage"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "SecurityAlert\n| where TimeGenerated {TimeRange:query}\n| summarize Alerts = count() by AlertSeverity\n| order by Alerts desc",
+        "size": 1,
+        "title": "Sentinel alerts by severity",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "tiles"
+      },
+      "name": "sentinel-alerts-by-severity"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let Window = 15m;\nlet FailedSignInThreshold = 8;\nlet DistinctAccountThreshold = 3;\nlet FailedSignIns =\n    SigninLogs\n    | where TimeGenerated {TimeRange:query}\n    | where tostring(ResultType) != '0'\n    | extend AccountName = tostring(UserPrincipalName)\n    | where isnotempty(AccountName) and isnotempty(IPAddress)\n    | summarize FailureCount = count(), DistinctAccounts = dcount(AccountName), FirstFailureTime = min(TimeGenerated), LastFailureTime = max(TimeGenerated) by IPAddress, TimeWindow = bin(TimeGenerated, Window);\nlet SuccessfulSignIns =\n    SigninLogs\n    | where TimeGenerated {TimeRange:query}\n    | where tostring(ResultType) == '0'\n    | extend AccountName = tostring(UserPrincipalName)\n    | where isnotempty(AccountName) and isnotempty(IPAddress)\n    | project SuccessTime = TimeGenerated, AccountName, IPAddress, AppDisplayName = tostring(AppDisplayName);\nFailedSignIns\n| where FailureCount >= FailedSignInThreshold and DistinctAccounts >= DistinctAccountThreshold\n| join kind=inner SuccessfulSignIns on IPAddress\n| where SuccessTime between (LastFailureTime .. (LastFailureTime + Window))\n| extend TimeGenerated = SuccessTime, Action = strcat('Failed sign-ins against ', tostring(DistinctAccounts), ' accounts followed by success. App=', AppDisplayName), Severity = case(FailureCount >= 25 or DistinctAccounts >= 8, 'High', 'Medium')\n| project TimeGenerated, AccountName, IPAddress, Action, Severity, FailureCount, DistinctAccounts, AppDisplayName\n| order by TimeGenerated desc",
+        "size": 1,
+        "title": "Potential lateral movement candidates",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "name": "lateral-movement-candidates"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let PrivilegedRoleOperations = dynamic(['Add member to role', 'Add eligible member to role', 'Add scoped member to role', 'Activate eligible role', 'Add app role assignment to service principal', 'Add delegated permission grant', 'Consent to application', 'Grant admin consent', 'Add owner to application', 'Add owner to service principal']);\nAuditLogs\n| where TimeGenerated {TimeRange:query}\n| where Category =~ 'RoleManagement' or OperationName has_any (PrivilegedRoleOperations)\n| where OperationName has_any (PrivilegedRoleOperations)\n| extend InitiatedByUser = tostring(InitiatedBy.user.userPrincipalName), InitiatedByApp = tostring(InitiatedBy.app.displayName), InitiatedByUserIp = tostring(InitiatedBy.user.ipAddress), InitiatedByAppIp = tostring(InitiatedBy.app.ipAddress)\n| extend AccountName = case(isnotempty(InitiatedByUser), InitiatedByUser, isnotempty(InitiatedByApp), InitiatedByApp, 'Unknown'), IPAddress = case(isnotempty(InitiatedByUserIp), InitiatedByUserIp, isnotempty(InitiatedByAppIp), InitiatedByAppIp, 'Unknown')\n| extend TargetResourcesDynamic = todynamic(TargetResources)\n| mv-expand TargetResource = TargetResourcesDynamic to typeof(dynamic)\n| extend TargetDisplayName = tostring(TargetResource.displayName), ModifiedProperties = todynamic(TargetResource.modifiedProperties)\n| extend ModifiedProperties = iff(isnull(ModifiedProperties) or array_length(ModifiedProperties) == 0, dynamic([{}]), ModifiedProperties)\n| mv-expand ModifiedProperty = ModifiedProperties to typeof(dynamic)\n| extend ModifiedPropertyName = tostring(ModifiedProperty.displayName), ModifiedPropertyNewValue = replace_string(tostring(ModifiedProperty.newValue), '\"', '')\n| summarize TargetResources = make_set(TargetDisplayName, 20), RoleOrPermissionNames = make_set_if(ModifiedPropertyNewValue, ModifiedPropertyName has_any ('Role.DisplayName', 'RoleDefinition.DisplayName', 'AppRole.DisplayName', 'DelegatedPermissionGrant.Scope')) by TimeGenerated, OperationName, Result = tostring(Result), AccountName, IPAddress, CorrelationId\n| extend RoleOrPermissionText = strcat_array(RoleOrPermissionNames, ', ')\n| extend Action = strcat(OperationName, '; result=', Result, '; roleOrPermission=', RoleOrPermissionText), Severity = case(tostring(RoleOrPermissionNames) has_any ('Global Administrator', 'Privileged Role Administrator', 'Owner', 'Application Administrator'), 'High', OperationName has_any ('Consent', 'permission grant', 'owner'), 'High', 'Medium')\n| project TimeGenerated, AccountName, IPAddress, Action, Severity, OperationName, TargetResources, RoleOrPermissionNames, CorrelationId\n| order by TimeGenerated desc",
+        "size": 1,
+        "title": "Privileged role and consent changes",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "name": "privileged-role-changes"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let Window = 15m;\nlet SecretOperationThreshold = 20;\nlet VaultThreshold = 2;\nlet SensitiveOperations = dynamic(['SecretGet', 'SecretList', 'SecretBackup', 'KeyGet', 'KeyList', 'KeyBackup', 'CertificateGet', 'CertificateList', 'CertificateBackup', 'secrets/read', 'secrets/list', 'secrets/backup', 'keys/read', 'keys/list', 'keys/backup', 'certificates/read', 'certificates/list', 'certificates/backup']);\nlet VaultDiagnosticEvents =\n    AzureDiagnostics\n    | where TimeGenerated {TimeRange:query}\n    | where tostring(column_ifexists('ResourceProvider', '')) =~ 'MICROSOFT.KEYVAULT' or tostring(column_ifexists('ResourceProvider', '')) =~ 'MICROSOFT.KEYVAULT/VAULTS'\n    | extend Operation = tostring(column_ifexists('OperationName', '')), Result = tostring(column_ifexists('ResultType', '')), UserPrincipalName = tostring(column_ifexists('identity_claim_upn_s', '')), AppId = tostring(column_ifexists('identity_claim_appid_g', '')), Caller = tostring(column_ifexists('Caller', '')), CallerIPAddress = tostring(column_ifexists('CallerIPAddress', '')), CallerIpAddress = tostring(column_ifexists('CallerIpAddress', ''))\n    | where Operation has_any (SensitiveOperations)\n    | extend AccountName = case(isnotempty(UserPrincipalName), UserPrincipalName, isnotempty(AppId), AppId, isnotempty(Caller), Caller, 'Unknown'), IPAddress = case(isnotempty(CallerIPAddress), CallerIPAddress, isnotempty(CallerIpAddress), CallerIpAddress, 'Unknown'), VaultResource = tostring(column_ifexists('Resource', ''))\n    | project TimeGenerated, AccountName, IPAddress, Operation, Result, VaultResource;\nlet VaultActivityEvents =\n    AzureActivity\n    | where TimeGenerated {TimeRange:query}\n    | where tostring(column_ifexists('ResourceProviderValue', '')) =~ 'MICROSOFT.KEYVAULT'\n    | extend Operation = tostring(column_ifexists('OperationNameValue', '')), Result = tostring(column_ifexists('ActivityStatusValue', '')), Caller = tostring(column_ifexists('Caller', '')), CallerIp = tostring(column_ifexists('CallerIpAddress', ''))\n    | where Operation has_any (SensitiveOperations)\n    | extend AccountName = iff(isnotempty(Caller), Caller, 'Unknown'), IPAddress = iff(isnotempty(CallerIp), CallerIp, 'Unknown'), VaultResource = tostring(column_ifexists('ResourceId', ''))\n    | project TimeGenerated, AccountName, IPAddress, Operation, Result, VaultResource;\nunion isfuzzy=true VaultDiagnosticEvents, VaultActivityEvents\n| summarize OperationCount = count(), VaultCount = dcount(VaultResource), OperationSet = make_set(Operation, 20), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated) by AccountName, IPAddress, TimeWindow = bin(TimeGenerated, Window)\n| where OperationCount >= SecretOperationThreshold or VaultCount >= VaultThreshold or tostring(OperationSet) has_any ('SecretBackup', 'KeyBackup', 'CertificateBackup', 'secrets/backup', 'keys/backup', 'certificates/backup')\n| extend TimeGenerated = LastSeen, Action = strcat('High-volume Key Vault sensitive object access: ', tostring(OperationCount), ' operations across ', tostring(VaultCount), ' vault resource(s).'), Severity = case(OperationCount >= 50 or VaultCount >= 3 or tostring(OperationSet) has_any ('SecretBackup', 'KeyBackup', 'CertificateBackup', 'secrets/backup', 'keys/backup', 'certificates/backup'), 'High', 'Medium')\n| project TimeGenerated, AccountName, IPAddress, Action, Severity, OperationCount, VaultCount, OperationSet, FirstSeen, LastSeen\n| order by TimeGenerated desc",
+        "size": 1,
+        "title": "Key Vault sensitive object access anomalies",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "visualization": "table"
+      },
+      "name": "key-vault-access-anomalies"
+    }
+  ],
   "metadata": {
-    "description": "TODO: Add Microsoft Sentinel security posture workbook content."
+    "description": "Microsoft Sentinel security posture workbook for the Azure Zero Trust pipeline lab.",
+    "version": "1.0.0",
+    "category": "Security"
   }
 }
-

@@ -1,3 +1,61 @@
 // Tactic: Lateral Movement | Technique: T1021
-// TODO: Add KQL query returning TimeGenerated, AccountName, IPAddress, Action, Severity.
-
+// Detects password-spray style failures followed by a successful sign-in from the same IP.
+let Lookback = 1d;
+let Window = 15m;
+let FailedSignInThreshold = 8;
+let DistinctAccountThreshold = 3;
+let FailedSignIns =
+    SigninLogs
+    | where TimeGenerated >= ago(Lookback)
+    | where tostring(ResultType) != "0"
+    | extend AccountName = tostring(UserPrincipalName)
+    | where isnotempty(AccountName) and isnotempty(IPAddress)
+    | summarize
+        FailureCount = count(),
+        DistinctAccounts = dcount(AccountName),
+        FailedAccountSample = make_set(AccountName, 25),
+        FirstFailureTime = min(TimeGenerated),
+        LastFailureTime = max(TimeGenerated)
+        by IPAddress, TimeWindow = bin(TimeGenerated, Window);
+let SuccessfulSignIns =
+    SigninLogs
+    | where TimeGenerated >= ago(Lookback)
+    | where tostring(ResultType) == "0"
+    | extend AccountName = tostring(UserPrincipalName)
+    | where isnotempty(AccountName) and isnotempty(IPAddress)
+    | project
+        SuccessTime = TimeGenerated,
+        AccountName,
+        IPAddress,
+        AppDisplayName = tostring(AppDisplayName),
+        UserAgent = tostring(UserAgent),
+        Location = tostring(Location);
+FailedSignIns
+| where FailureCount >= FailedSignInThreshold
+| where DistinctAccounts >= DistinctAccountThreshold
+| join kind=inner SuccessfulSignIns on IPAddress
+| where SuccessTime between (LastFailureTime .. (LastFailureTime + Window))
+| extend
+    TimeGenerated = SuccessTime,
+    Action = strcat(
+        "Multiple failed sign-ins against ",
+        tostring(DistinctAccounts),
+        " accounts followed by successful sign-in from same IP. App=",
+        AppDisplayName
+    ),
+    Severity = case(FailureCount >= 25 or DistinctAccounts >= 8, "High", "Medium")
+| project
+    TimeGenerated,
+    AccountName,
+    IPAddress,
+    Action,
+    Severity,
+    FailureCount,
+    DistinctAccounts,
+    FailedAccountSample,
+    FirstFailureTime,
+    LastFailureTime,
+    AppDisplayName,
+    UserAgent,
+    Location
+| order by TimeGenerated desc

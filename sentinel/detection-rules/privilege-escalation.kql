@@ -1,3 +1,95 @@
-// Tactic: Privilege Escalation | Technique: T1078
-// TODO: Add KQL query returning TimeGenerated, AccountName, IPAddress, Action, Severity.
-
+// Tactic: Privilege Escalation | Technique: T1098
+// Detects privileged role changes, PIM activations, app ownership changes, and high-impact consent events.
+let Lookback = 1d;
+let PrivilegedRoleOperations = dynamic([
+    "Add member to role",
+    "Add eligible member to role",
+    "Add scoped member to role",
+    "Activate eligible role",
+    "Add app role assignment to service principal",
+    "Add delegated permission grant",
+    "Consent to application",
+    "Grant admin consent",
+    "Add owner to application",
+    "Add owner to service principal"
+]);
+AuditLogs
+| where TimeGenerated >= ago(Lookback)
+| where Category =~ "RoleManagement" or OperationName has_any (PrivilegedRoleOperations)
+| where OperationName has_any (PrivilegedRoleOperations)
+| extend
+    InitiatedByUser = tostring(InitiatedBy.user.userPrincipalName),
+    InitiatedByApp = tostring(InitiatedBy.app.displayName),
+    InitiatedByUserIp = tostring(InitiatedBy.user.ipAddress),
+    InitiatedByAppIp = tostring(InitiatedBy.app.ipAddress)
+| extend
+    AccountName = case(
+        isnotempty(InitiatedByUser), InitiatedByUser,
+        isnotempty(InitiatedByApp), InitiatedByApp,
+        "Unknown"
+    ),
+    IPAddress = case(
+        isnotempty(InitiatedByUserIp), InitiatedByUserIp,
+        isnotempty(InitiatedByAppIp), InitiatedByAppIp,
+        "Unknown"
+    ),
+    Result = tostring(Result)
+| extend TargetResourcesDynamic = todynamic(TargetResources)
+| mv-expand TargetResource = TargetResourcesDynamic to typeof(dynamic)
+| extend
+    TargetDisplayName = tostring(TargetResource.displayName),
+    TargetType = tostring(TargetResource.type),
+    ModifiedProperties = todynamic(TargetResource.modifiedProperties)
+| extend ModifiedProperties = iff(isnull(ModifiedProperties) or array_length(ModifiedProperties) == 0, dynamic([{}]), ModifiedProperties)
+| mv-expand ModifiedProperty = ModifiedProperties to typeof(dynamic)
+| extend
+    ModifiedPropertyName = tostring(ModifiedProperty.displayName),
+    ModifiedPropertyNewValue = replace_string(tostring(ModifiedProperty.newValue), '"', '')
+| summarize
+    TargetResources = make_set(TargetDisplayName, 20),
+    TargetTypes = make_set(TargetType, 20),
+    ChangedProperties = make_set(ModifiedPropertyName, 20),
+    RoleOrPermissionNames = make_set_if(
+        ModifiedPropertyNewValue,
+        ModifiedPropertyName has_any (
+            "Role.DisplayName",
+            "RoleDefinition.DisplayName",
+            "AppRole.DisplayName",
+            "DelegatedPermissionGrant.Scope"
+        )
+    ),
+    EventCount = count()
+    by TimeGenerated, OperationName, Result, AccountName, IPAddress, CorrelationId
+| extend
+    TargetResourcesText = strcat_array(TargetResources, ", "),
+    RoleOrPermissionText = strcat_array(RoleOrPermissionNames, ", ")
+| extend
+    Action = strcat(
+        OperationName,
+        "; result=",
+        Result,
+        "; target=",
+        TargetResourcesText,
+        iff(isempty(RoleOrPermissionText), "", strcat("; roleOrPermission=", RoleOrPermissionText))
+    ),
+    Severity = case(
+        tostring(RoleOrPermissionNames) has_any ("Global Administrator", "Privileged Role Administrator", "Owner", "Application Administrator"),
+        "High",
+        OperationName has_any ("Consent", "permission grant", "owner"),
+        "High",
+        "Medium"
+    )
+| project
+    TimeGenerated,
+    AccountName,
+    IPAddress,
+    Action,
+    Severity,
+    OperationName,
+    Result,
+    TargetResources,
+    TargetTypes,
+    RoleOrPermissionNames,
+    ChangedProperties,
+    CorrelationId
+| order by TimeGenerated desc
