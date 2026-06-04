@@ -1,0 +1,8 @@
+# CI security workflow placeholder.
+# TODO: Add fail-fast security gates in this order:
+# 1. Gitleaks secrets scanning.
+# 2. Semgrep SAST.
+# 3. Trivy container scanning.
+# 4. Checkov IaC scanning.
+# 5. Microsoft Security DevOps / Defender for DevOps.
+

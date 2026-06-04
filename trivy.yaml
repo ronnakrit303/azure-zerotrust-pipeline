@@ -1,0 +1,7 @@
+# Trivy configuration placeholder.
+# TODO: Tune severity thresholds and ignored vulnerabilities after risk review.
+
+severity:
+  - CRITICAL
+  - HIGH
+

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-09-01/policyAssignment.json#",
+  "properties": {
+    "displayName": "TODO: CIS Azure Benchmark assignment",
+    "description": "Placeholder assignment for CIS Azure Benchmark policy initiatives.",
+    "policyDefinitionId": "TODO",
+    "parameters": {},
+    "metadata": {
+      "assignedBy": "TODO",
+      "version": "0.1.0",
+      "category": "Security"
+    }
+  }
+}
+

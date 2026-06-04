@@ -1,0 +1,5 @@
+# Gitleaks configuration placeholder.
+# TODO: Add project-specific allowlists and rules as needed.
+
+title = "azure-zerotrust-pipeline"
+

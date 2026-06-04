@@ -1,0 +1,3 @@
+// Tactic: Privilege Escalation | Technique: T1078
+// TODO: Add KQL query returning TimeGenerated, AccountName, IPAddress, Action, Severity.
+

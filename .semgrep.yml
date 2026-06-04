@@ -1,0 +1,5 @@
+# Semgrep configuration placeholder.
+# TODO: Add OWASP Top Ten and secrets rulesets or custom rules.
+
+rules: []
+

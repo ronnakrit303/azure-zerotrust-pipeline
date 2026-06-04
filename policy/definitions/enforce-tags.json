@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-09-01/policyDefinition.json#",
+  "properties": {
+    "displayName": "TODO: Enforce required tags",
+    "description": "Placeholder policy definition. Add the Azure Policy rule before deployment.",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "0.1.0",
+      "category": "Governance",
+      "cisControl": "TODO"
+    },
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "TODO"
+      },
+      "then": {
+        "effect": "audit"
+      }
+    }
+  }
+}
+

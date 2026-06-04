@@ -1,0 +1,7 @@
+# Checkov configuration placeholder.
+# TODO: Configure Bicep/ARM scanning scope and skip rules with rationale.
+
+framework:
+  - arm
+compact: true
+

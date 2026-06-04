@@ -1,0 +1,3 @@
+// Tactic: Lateral Movement | Technique: T1021
+// TODO: Add KQL query returning TimeGenerated, AccountName, IPAddress, Action, Severity.
+
