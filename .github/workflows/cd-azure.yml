@@ -83,12 +83,15 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Run subscription what-if
+        env:
+          DEPLOY_ENV: ${{ github.event.inputs.environment }}
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
           az deployment sub what-if \
-            --name zt-${{ github.event.inputs.environment }}-${{ github.run_number }} \
+            --name "zt-$DEPLOY_ENV-$RUN_NUMBER" \
             --location "$AZURE_LOCATION" \
             --template-file infra/main.bicep \
-            --parameters infra/parameters/${{ github.event.inputs.environment }}.bicepparam
+            --parameters "infra/parameters/$DEPLOY_ENV.bicepparam"
 
   deploy:
     name: Deploy Azure
@@ -109,9 +112,12 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy subscription Bicep
+        env:
+          DEPLOY_ENV: ${{ github.event.inputs.environment }}
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
           az deployment sub create \
-            --name zt-${{ github.event.inputs.environment }}-${{ github.run_number }} \
+            --name "zt-$DEPLOY_ENV-$RUN_NUMBER" \
             --location "$AZURE_LOCATION" \
             --template-file infra/main.bicep \
-            --parameters infra/parameters/${{ github.event.inputs.environment }}.bicepparam
+            --parameters "infra/parameters/$DEPLOY_ENV.bicepparam"
