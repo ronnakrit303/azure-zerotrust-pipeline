@@ -26,6 +26,20 @@ details later.
 | Privilege Escalation Alert | Privilege Escalation | T1098 | Implemented |
 | Secrets Exfiltration Monitor | Exfiltration | T1552 | Implemented |
 
+## Analytics Rule Defaults
+
+| Rule | Query file | Frequency | Lookup period | Severity | Entity mappings |
+|---|---|---|---|---|---|
+| Lateral Movement Detection | `sentinel/detection-rules/lateral-movement.kql` | 15 minutes | 1 day | Dynamic, Medium or High | `AccountName` to Account, `IPAddress` to IP |
+| Privilege Escalation Alert | `sentinel/detection-rules/privilege-escalation.kql` | 15 minutes | 1 day | Dynamic, Medium or High | `AccountName` to Account, `IPAddress` to IP |
+| Secrets Exfiltration Monitor | `sentinel/detection-rules/secrets-exfiltration.kql` | 15 minutes | 1 day | Dynamic, Medium or High | `AccountName` to Account, `IPAddress` to IP |
+
+Recommended alert details:
+
+- Custom details: `Action`, `Severity`, operation counts, target resources, and correlation IDs when present.
+- Alert grouping: group by `AccountName`, `IPAddress`, and rule name for 1 hour during early testing.
+- Incident creation: enabled after each query has been tuned against workspace data.
+
 ## Rules
 
 ### Lateral Movement Detection
@@ -74,3 +88,22 @@ The workbook artifact is `sentinel/workbooks/security-posture.json`. It includes
 - Lateral movement candidates from `SigninLogs`.
 - Privileged role and consent changes from `AuditLogs`.
 - Key Vault access anomalies from `AzureDiagnostics` and `AzureActivity`.
+
+## Validation Checklist
+
+Use this checklist after the Log Analytics workspace and Sentinel are deployed:
+
+1. Confirm `SigninLogs` and `AuditLogs` are ingesting Entra ID data.
+2. Confirm `AzureActivity` is connected for the subscription.
+3. Enable Key Vault diagnostic settings before relying on the secrets exfiltration rule.
+4. Run each KQL file in Logs with the expected time range.
+5. Confirm every rule returns `TimeGenerated`, `AccountName`, `IPAddress`, `Action`, and `Severity`.
+6. Import or create scheduled analytics rules with the defaults above.
+7. Import `sentinel/workbooks/security-posture.json` into Sentinel or Azure Monitor Workbooks.
+8. Tune thresholds before enabling incident creation in production.
+
+## References
+
+- Microsoft Learn: Microsoft Sentinel scheduled analytics rules, https://learn.microsoft.com/en-us/azure/sentinel/scheduled-rules-overview
+- Microsoft Learn: Map data fields to Microsoft Sentinel entities, https://learn.microsoft.com/en-us/azure/sentinel/map-data-fields-to-entities
+- Microsoft Learn: Azure Monitor workbook time parameters, https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/workbooks-time
