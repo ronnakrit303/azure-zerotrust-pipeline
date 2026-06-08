@@ -1,7 +1,12 @@
-# Checkov configuration placeholder.
-# TODO: Configure Bicep/ARM scanning scope and skip rules with rationale.
+# Checkov configuration for the Azure Zero Trust lab.
+# Defender Standard plans are modeled as code but disabled by default to avoid
+# unplanned Azure for Students cost. The related checks are accepted lab
+# exceptions and documented in docs/architecture.md and docs/compliance-report.md.
 
 framework:
-  - arm
+  - bicep
 compact: true
-
+skip-check:
+  - CKV_AZURE_19   # Defender Standard is opt-in until budget review.
+  - CKV_AZURE_84   # Defender for Storage is defined for prod but disabled by default to avoid cost.
+  - CKV_AZURE_87   # Defender for Key Vault is defined for prod but disabled by default to avoid cost.

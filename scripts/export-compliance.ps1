@@ -269,7 +269,7 @@ function Write-Summary {
     $lines.Add("") | Out-Null
     $lines.Add("- Evidence files can include subscription IDs, tenant IDs, resource names, and policy state.") | Out-Null
     $lines.Add("- Keep generated reports out of Git unless they are intentionally sanitized.") | Out-Null
-    $lines.Add("- `reports/` is ignored by `.gitignore` for this reason.") | Out-Null
+    $lines.Add('- `reports/` is ignored by `.gitignore` for this reason.') | Out-Null
 
     Set-Content -Path $summaryPath -Value $lines -Encoding utf8
 }

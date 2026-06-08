@@ -66,7 +66,7 @@ Azure deployment:
 
 - Azure subscription
 - `az login`
-- Required resource providers registered for Network, OperationalInsights, SecurityInsights, Authorization, Security, ManagedIdentity, and PolicyInsights
+- Required resource providers registered for Network, OperationalInsights, OperationsManagement, SecurityInsights, Authorization, Security, ManagedIdentity, and PolicyInsights
 - GitHub OIDC federated credential for deployment from GitHub Actions
 - GitHub secrets:
   - `AZURE_CLIENT_ID`
@@ -140,6 +140,11 @@ bash scripts/setup-azure.sh --environment dev
 bash scripts/setup-azure.sh --environment prod --skip-what-if
 bash scripts/setup-azure.sh --environment dev --register-providers
 ```
+
+`Microsoft.OperationsManagement` is required for Microsoft Sentinel onboarding
+on the Log Analytics workspace. If Sentinel deployment fails with
+`MissingSubscriptionRegistration`, register that provider and rerun the infra
+deployment after reviewing what-if output.
 
 Compliance evidence export. Generated files are written under `reports/`, which
 is ignored by Git because exports can contain subscription and resource IDs:
@@ -325,6 +330,8 @@ python -X utf8 -m unittest discover -s app\tests -v
 - Azure validate/what-if requires `az login` and a subscription.
 - Local Docker build requires Docker Desktop engine to be running.
 - Local Checkov requires Checkov to be installed; CI installs it automatically.
+- Defender Standard Checkov checks are documented lab exceptions because paid
+  Defender plans are defined as code but disabled by default until budget review.
 - Sentinel KQL needs real Log Analytics data before production tuning.
 - App hosting infrastructure is not implemented yet; the app currently exists as a scan-ready container target.
 

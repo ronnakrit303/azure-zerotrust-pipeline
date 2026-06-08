@@ -21,6 +21,7 @@ PROVIDERS=(
   "Microsoft.Resources"
   "Microsoft.Network"
   "Microsoft.OperationalInsights"
+  "Microsoft.OperationsManagement"
   "Microsoft.SecurityInsights"
   "Microsoft.ManagedIdentity"
   "Microsoft.Security"

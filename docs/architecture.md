@@ -71,6 +71,23 @@ flowchart TB
 | Governance scope | `policy/main.bicep` | Creates custom policy definitions, initiative, assignment identity, and tag remediation tasks. |
 | Application scope | `app/` | Provides a scan-ready demo API and Docker target for CI security gates. |
 
+## Required Azure Resource Providers
+
+The setup helper checks and optionally registers the resource providers needed
+by the dev/prod templates:
+
+| Provider | Why it is needed |
+|---|---|
+| `Microsoft.Resources` | Subscription deployments and workload resource group creation. |
+| `Microsoft.Network` | VNet, subnets, and NSGs. |
+| `Microsoft.OperationalInsights` | Log Analytics workspace. |
+| `Microsoft.OperationsManagement` | Microsoft Sentinel onboarding dependency for the workspace. |
+| `Microsoft.SecurityInsights` | Microsoft Sentinel onboarding state. |
+| `Microsoft.ManagedIdentity` | Optional Conditional Access deployment identity and policy assignment identity support. |
+| `Microsoft.Security` | Optional Defender for Cloud pricing plans. |
+| `Microsoft.Authorization` | Custom Azure Policy definitions, initiatives, assignments, and RBAC. |
+| `Microsoft.PolicyInsights` | Optional Azure Policy remediation tasks and compliance evidence. |
+
 ## Data Flows
 
 | Flow | Source | Destination | Security Controls |
@@ -123,6 +140,8 @@ The deployment model is intentionally staged:
 | 2026-06-04 | Monitoring | Create Log Analytics with local auth disabled and onboard Microsoft Sentinel through `Microsoft.SecurityInsights/onboardingStates`. | Centralizes logs for detections and uses Azure RBAC-aware access. |
 | 2026-06-04 | Identity | Manage Conditional Access with an opt-in deployment script that calls Microsoft Graph API. | Microsoft Graph Bicep resource types do not currently expose Conditional Access policies directly, so Graph API automation is required. |
 | 2026-06-04 | Defender | Make Defender for Cloud plan configuration opt-in through parameters. | Defender Standard plans can incur cost and should be enabled intentionally. |
+| 2026-06-08 | IaC scanning | Accept Checkov Defender Standard findings as documented lab exceptions. | Defender Standard plans are defined in code but disabled by default to avoid unplanned Azure for Students cost. |
+| 2026-06-08 | Monitoring | Add `Microsoft.OperationsManagement` to the required provider list. | Sentinel onboarding can fail without this subscription provider registration. |
 | 2026-06-04 | Pipeline | Run Gitleaks first, then Semgrep, Trivy, Checkov, and MSDO. | Fails fast on secrets and keeps later security gates dependent on clean earlier stages. |
 | 2026-06-04 | Azure deployment | Use GitHub OIDC for Azure login and avoid stored client secrets. | Reduces secret management risk and aligns with workload identity federation. |
 | 2026-06-04 | Azure Policy | Start `dev` with audit effects and `DoNotEnforce`, and reserve deny/modify for `prod`. | Supports safe rollout and avoids blocking expected lab changes before validation. |
@@ -136,6 +155,8 @@ The deployment model is intentionally staged:
 |---|---|---|
 | Conditional Access can lock out administrators | Disabled by default and requires break-glass object IDs | Test in report-only mode before enforcement. |
 | Defender Standard plans can create cost | Disabled by default | Enable only after budget review. |
+| Checkov reports Defender Standard recommendations | `.checkov.yaml` records scoped exceptions for Defender checks | Revisit the exceptions before enabling paid Defender plans or promoting production. |
+| Sentinel onboarding depends on subscription provider registration | `scripts/setup-azure.sh` checks `Microsoft.OperationsManagement` with the other required providers | Register providers before deployment and rerun what-if after registration changes. |
 | KQL rules may generate false positives | Thresholds are documented in the playbook | Tune against real Log Analytics data. |
 | Azure Policy deny effects can block deployments | Dev uses audit and `DoNotEnforce` | Promote effects gradually after impact review. |
 | Docker local verification depends on Docker Desktop | CI runner has Docker by default | Re-run GitHub Actions after app changes. |

@@ -42,11 +42,19 @@ expected Azure evidence, and gaps to validate after deployment.
 | Secrets scanning | Gitleaks in CI and local scan | No leaks found in latest local validation. |
 | SAST | Semgrep OWASP and secrets rules | 0 blocking findings in latest local validation. |
 | Container scanning | Trivy image/filesystem scan in CI | Pipeline target exists; local filesystem scan passed. |
-| IaC scanning | Checkov for Bicep | CI gate implemented, soft-fail advisory mode. |
+| IaC scanning | Checkov for Bicep | CI gate implemented; Defender Standard findings are documented lab exceptions. |
 | Defender for DevOps | MSDO GitHub Action and Azure DevOps task | CI gate implemented. |
 | Bicep validation | `az bicep build`, `az bicep build-params` | Previously validated for infra/policy dev/prod parameters. |
 | Application tests | Python unit tests | 7 tests passed in latest local validation. |
 | KQL content | Sentinel detection files | Required header and output fields present. |
+
+## Accepted Lab Exceptions
+
+| Tool / Control | Exception | Rationale | Revisit Trigger |
+|---|---|---|---|
+| Checkov `CKV_AZURE_19` | Defender Standard pricing is not enforced by default. | Defender Standard can create Azure cost, so the lab defines plans as code but keeps `enableDefenderPlans = false`. | Budget approval and production promotion. |
+| Checkov `CKV_AZURE_84` | Defender for Storage is not enabled by default. | No storage workload is deployed yet, and Defender for Storage can incur cost. | Storage module deployment and budget approval. |
+| Checkov `CKV_AZURE_87` | Defender for Key Vault is not enabled by default. | Key Vault resources are not deployed yet, and Defender for Key Vault can incur cost. | Key Vault module deployment and budget approval. |
 
 ## CIS Azure Benchmark Mapping
 
@@ -54,7 +62,7 @@ expected Azure evidence, and gaps to validate after deployment.
 |---|---|---|---|---|
 | 1.23 | Ensure that no custom subscription administrator roles exist | Templates avoid creating custom admin roles or broad Owner/Contributor assignments. Policy remediation uses Tag Contributor only. | Partial | Validate actual Azure subscription RBAC after deployment. |
 | 2.1.1 | Ensure that Microsoft Defender for Servers is set to On | `infra/parameters/prod.bicepparam` includes `VirtualMachines` Defender plan with `P2`, guarded by `enableDefenderPlans`. | Ready to enable | Enable after cost review and confirm Defender for Cloud regulatory compliance. |
-| 2.1.10 | Ensure that Microsoft Defender for Key Vault is set to On | `infra/parameters/prod.bicepparam` includes `KeyVaults` Defender plan, guarded by `enableDefenderPlans`. | Ready to enable | Enable after cost review and deploy Key Vault resources. |
+| 2.1.10 | Ensure that Microsoft Defender for Key Vault is set to On | `infra/parameters/prod.bicepparam` includes `KeyVaults` Defender plan, guarded by `enableDefenderPlans`. | Ready to enable | Enable after cost review and deploy Key Vault resources. Checkov exception `CKV_AZURE_87` tracks this tradeoff. |
 | 3.1 | Ensure that Secure transfer required is set to Enabled | `policy/definitions/require-https.json` checks `Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly`. | Implemented as code | Deploy policy assignment and validate compliance results. |
 | 3.10 | Ensure Private Endpoints are used to access Storage Accounts | `infra/modules/network.bicep` creates a private endpoint subnet; policy report documents private connectivity intent. | Partial | Add storage account and private endpoint module when storage is introduced. |
 | 5.4 | Ensure resource logs are enabled for Azure services | `infra/modules/sentinel.bicep` creates Log Analytics and Sentinel; KQL playbook lists required tables. | Partial | Add diagnostic settings for each deployed Azure resource. |
@@ -76,7 +84,7 @@ expected Azure evidence, and gaps to validate after deployment.
 
 | Gap | Reason | Planned Action |
 |---|---|---|
-| No live Defender for Cloud compliance score | Azure deployment is not active yet. | Deploy dev and add CIS v2.0.0 regulatory compliance dashboard evidence. |
+| No live Defender for Cloud compliance score | Dev is deployed, but Defender Standard plans remain disabled by design. | Export Defender for Cloud regulatory compliance evidence and enable paid plans only after budget review. |
 | Conditional Access not enabled | Requires Graph permissions and break-glass object IDs. | Test report-only policy state before enforcement. |
 | No diagnostic settings for workload resources yet | Demo app has not been hosted in Azure. | Add diagnostic settings module when App Service, Container Apps, or AKS is chosen. |
 | Storage private endpoint not implemented | No storage account exists in the lab scope yet. | Add storage module with private endpoint when app needs persistent storage. |
