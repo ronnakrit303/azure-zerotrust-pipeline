@@ -18,6 +18,20 @@ details later.
 > Note: The rules are written to use common Sentinel tables, but they still need to be
 > tuned and tested against a real Log Analytics workspace before production enforcement.
 
+## Lab Validation Status
+
+As of the dev validation run, `AzureActivity` is connected through the subscription
+diagnostic setting `azzt-activity-dev-sea` and is ingesting control-plane activity into
+`log-devsecops-dev-sea`.
+
+`SigninLogs` and `AuditLogs` are not connected in this lab subscription because the
+account is in a university-managed Entra tenant and does not have tenant-level permission
+to read or configure `microsoft.aadiam` diagnostic settings. The Azure portal returns
+`AuthorizationFailed` for `microsoft.aadiam/diagnosticSettingsCategories/read`. The
+lateral movement and privilege escalation rules are therefore documented as implemented
+and syntax-tested, but blocked from full live-data tuning until the tenant administrator
+grants an Entra role such as Security Administrator or exports the logs to the workspace.
+
 ## Detection Rule Index
 
 | Rule | MITRE Tactic | Technique | Status |
