@@ -73,6 +73,30 @@ the KQL rule produced a High severity detection.
 The test Key Vault was deleted and purged after evidence capture so the lab does not
 keep an unnecessary billable validation resource.
 
+## Measured Outcomes
+
+These metrics are taken from the lab evidence and are safe to present because they are
+direct validation results, not estimated business impact.
+
+| Measurement | Result |
+|---|---:|
+| CI security gates passed | 5 / 5, 100% |
+| CD validation jobs passed | 2 / 2, 100% |
+| Compliance export checks passed | 18 / 18, 100% |
+| Checkov IaC failed findings after documented exceptions | 0 |
+| Active dev Azure resources deployed | 6 |
+| `AzureActivity` rows ingested during validation | 6 |
+| Key Vault `AuditEvent` rows ingested during validation | 121 |
+| High severity KQL detections generated | 1 |
+| Secret operations observed by the detection | 60 |
+| Detection threshold multiplier | 3x over the threshold of 20 |
+| Temporary validation resources cleaned up | 100% |
+
+The lab does not claim a percentage reduction in risk, cloud cost, or incident response
+time because those would require a measured baseline and follow-up operating data.
+Instead, the portfolio evidence shows control coverage, validation pass rates, telemetry
+ingestion, detection behavior, and cleanup hygiene.
+
 ## Constraints And Tradeoffs
 
 - Entra ID `SigninLogs` and `AuditLogs` were not connected because the lab account is

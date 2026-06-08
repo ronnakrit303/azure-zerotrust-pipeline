@@ -308,6 +308,58 @@ svg {
   gap: 14px;
 }
 
+.outcome-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.outcome {
+  min-height: 140px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.outcome span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.outcome strong {
+  display: block;
+  margin-top: 10px;
+  color: var(--blue);
+  font-size: 32px;
+  line-height: 1;
+}
+
+.outcome p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.metrics-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid #efd4a8;
+  background: #fffaf1;
+}
+
+.metrics-note p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 .lane,
 .decision,
 .evidence-card {
@@ -549,6 +601,7 @@ svg {
 
   .summary-grid,
   .lane-grid,
+  .outcome-grid,
   .decision-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -578,6 +631,7 @@ svg {
   .nav-list,
   .summary-grid,
   .lane-grid,
+  .outcome-grid,
   .evidence-grid,
   .decision-grid {
     grid-template-columns: 1fr;

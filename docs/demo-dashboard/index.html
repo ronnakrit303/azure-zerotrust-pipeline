@@ -170,6 +170,68 @@
           </div>
         </section>
 
+        <section class="dashboard-band" aria-label="Measured outcomes">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Evidence-Based Metrics</p>
+              <h3>Measured Outcomes</h3>
+            </div>
+          </div>
+
+          <div class="outcome-grid">
+            <article class="outcome">
+              <span>CI gates passed</span>
+              <strong>5 / 5</strong>
+              <p>100% security gate pass rate in the validated CI run.</p>
+            </article>
+            <article class="outcome">
+              <span>CD validation</span>
+              <strong>2 / 2</strong>
+              <p>100% validation job pass rate with deploy intentionally skipped.</p>
+            </article>
+            <article class="outcome">
+              <span>Compliance export</span>
+              <strong>18 / 18</strong>
+              <p>100% evidence checks passed in the final export.</p>
+            </article>
+            <article class="outcome">
+              <span>Checkov failures</span>
+              <strong>0</strong>
+              <p>Failed IaC findings after documented lab exceptions.</p>
+            </article>
+            <article class="outcome">
+              <span>Azure resources</span>
+              <strong>6</strong>
+              <p>Active dev resources in the workload resource group.</p>
+            </article>
+            <article class="outcome">
+              <span>AzureActivity rows</span>
+              <strong>6</strong>
+              <p>Subscription activity rows validated in Log Analytics.</p>
+            </article>
+            <article class="outcome">
+              <span>Key Vault AuditEvent rows</span>
+              <strong>121</strong>
+              <p>Diagnostic rows ingested during controlled KQL validation.</p>
+            </article>
+            <article class="outcome">
+              <span>Detection threshold</span>
+              <strong>3x</strong>
+              <p>60 secret operations versus a threshold of 20.</p>
+            </article>
+          </div>
+
+          <div class="metrics-note">
+            <span class="badge warn">No baseline claim</span>
+            <p>
+              This dashboard does not claim percentage risk reduction, cost reduction,
+              or incident response improvement because those require pre/post operating
+              baselines. The measured outcomes show validation coverage, telemetry,
+              detection behavior, and cleanup hygiene.
+            </p>
+          </div>
+        </section>
+
         <section class="evidence-layout" id="evidence" aria-label="Evidence gallery">
           <div class="section-title">
             <div>
