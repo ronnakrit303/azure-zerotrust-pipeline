@@ -22,6 +22,8 @@ real scan/build target.
 For a public, sanitized validation summary with redacted screenshots, see
 `docs/portfolio-case-study.md`.
 
+For an interactive static demo dashboard, open `docs/demo-dashboard/index.html`.
+
 ## Architecture
 
 ```mermaid

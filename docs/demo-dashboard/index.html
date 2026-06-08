@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Azure Zero Trust DevSecOps Demo Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Dashboard navigation">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">ZT</div>
+          <div>
+            <p class="eyebrow">Portfolio Lab</p>
+            <h1>Azure Zero Trust</h1>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Sections">
+          <a class="nav-item active" href="#overview">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z" /></svg>
+            Overview
+          </a>
+          <a class="nav-item" href="#pipeline">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 4h10v4H7V4Zm-3 8h7v4H4v-4Zm9 0h7v4h-7v-4ZM8 8h2v4H8V8Zm6 0h2v4h-2V8Zm-5 8h2v4H9v-4Zm4 0h2v4h-2v-4Z" /></svg>
+            CI/CD
+          </a>
+          <a class="nav-item" href="#sentinel">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5.1 3.4 9.8 8 11 4.6-1.2 8-5.9 8-11V5l-8-3Zm0 4.2 4 1.5v3.4c0 3-1.6 5.9-4 7.3-2.4-1.4-4-4.3-4-7.3V7.7l4-1.5Z" /></svg>
+            Sentinel
+          </a>
+          <a class="nav-item" href="#evidence">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 3h14v18H5V3Zm3 4v2h8V7H8Zm0 4v2h8v-2H8Zm0 4v2h5v-2H8Z" /></svg>
+            Evidence
+          </a>
+          <a class="nav-item" href="#tradeoffs">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2 2 20h20L12 2Zm1 14h-2v2h2v-2Zm0-7h-2v5h2V9Z" /></svg>
+            Tradeoffs
+          </a>
+        </nav>
+
+        <div class="sidebar-note">
+          <span class="status-dot"></span>
+          Dev validation complete
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Live Validation Summary</p>
+            <h2>DevSecOps, governance, and Sentinel telemetry dashboard</h2>
+          </div>
+          <div class="topbar-actions" aria-label="Document links">
+            <a class="icon-link" href="../portfolio-case-study.md" title="Open case study">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z" /></svg>
+              Case study
+            </a>
+            <a class="icon-link" href="../kql-playbook.md" title="Open KQL playbook">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16v14H4V5Zm2 2v10h12V7H6Zm2 2h3v2H8V9Zm0 4h8v2H8v-2Zm5-4h3v2h-3V9Z" /></svg>
+              KQL playbook
+            </a>
+          </div>
+        </header>
+
+        <section class="summary-grid" id="overview" aria-label="Validation summary">
+          <article class="metric pass">
+            <span class="metric-label">CI Security</span>
+            <strong>Passed</strong>
+            <span>5 security gates</span>
+          </article>
+          <article class="metric pass">
+            <span class="metric-label">Azure CD</span>
+            <strong>What-if</strong>
+            <span>OIDC validated</span>
+          </article>
+          <article class="metric info">
+            <span class="metric-label">Policy</span>
+            <strong>Audit dev</strong>
+            <span>DoNotEnforce</span>
+          </article>
+          <article class="metric pass">
+            <span class="metric-label">Sentinel</span>
+            <strong>Onboarded</strong>
+            <span>Workspace connected</span>
+          </article>
+          <article class="metric pass">
+            <span class="metric-label">AzureActivity</span>
+            <strong>6 rows</strong>
+            <span>Telemetry verified</span>
+          </article>
+          <article class="metric alert">
+            <span class="metric-label">KQL Detection</span>
+            <strong>High</strong>
+            <span>60 secret operations</span>
+          </article>
+        </section>
+
+        <section class="dashboard-band" aria-label="Validation lanes">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Control Plane</p>
+              <h3>Validation Lanes</h3>
+            </div>
+            <div class="segmented" role="tablist" aria-label="Lane filter">
+              <button class="segment active" type="button" data-lane="all">All</button>
+              <button class="segment" type="button" data-lane="security">Security</button>
+              <button class="segment" type="button" data-lane="azure">Azure</button>
+              <button class="segment" type="button" data-lane="kql">KQL</button>
+            </div>
+          </div>
+
+          <div class="lane-grid" id="pipeline">
+            <article class="lane" data-lane="security">
+              <div class="lane-head">
+                <h4>CI Security Gates</h4>
+                <span class="badge pass">Pass</span>
+              </div>
+              <ul class="check-list">
+                <li>Gitleaks secrets scan</li>
+                <li>Semgrep SAST</li>
+                <li>Trivy container scan</li>
+                <li>Checkov IaC scan</li>
+                <li>Microsoft Security DevOps</li>
+              </ul>
+            </article>
+
+            <article class="lane" data-lane="azure">
+              <div class="lane-head">
+                <h4>Azure Deployment</h4>
+                <span class="badge pass">Validated</span>
+              </div>
+              <ul class="check-list">
+                <li>GitHub OIDC credential verified</li>
+                <li>Bicep build passed</li>
+                <li>CD what-if completed</li>
+                <li>Dev deploy resources present</li>
+                <li>Azure Activity diagnostics retained</li>
+              </ul>
+            </article>
+
+            <article class="lane" data-lane="azure">
+              <div class="lane-head">
+                <h4>Governance Baseline</h4>
+                <span class="badge info">Audit</span>
+              </div>
+              <ul class="check-list">
+                <li>Policy initiative assigned</li>
+                <li>DoNotEnforce for dev iteration</li>
+                <li>Allowed regions policy present</li>
+                <li>Compliance export generated</li>
+                <li>Accepted cost tradeoffs documented</li>
+              </ul>
+            </article>
+
+            <article class="lane" data-lane="kql" id="sentinel">
+              <div class="lane-head">
+                <h4>Sentinel / KQL</h4>
+                <span class="badge alert">Detected</span>
+              </div>
+              <ul class="check-list">
+                <li>Sentinel workspace onboarded</li>
+                <li>AzureActivity ingestion verified</li>
+                <li>Key Vault AuditEvent ingested</li>
+                <li>Secrets exfiltration rule fired</li>
+                <li>Temporary Key Vault purged</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="evidence-layout" id="evidence" aria-label="Evidence gallery">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Sanitized Evidence</p>
+              <h3>Evidence Gallery</h3>
+            </div>
+            <label class="search-box">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 19.6-5.2-5.2A7.2 7.2 0 1 0 14.4 16l5.2 5.2 1.4-1.6ZM5 10a5 5 0 1 1 10 0 5 5 0 0 1-10 0Z" /></svg>
+              <input id="evidenceSearch" type="search" placeholder="Filter evidence" />
+            </label>
+          </div>
+
+          <div class="evidence-grid" id="evidenceGrid"></div>
+        </section>
+
+        <section class="dashboard-band" id="tradeoffs" aria-label="Accepted limitations and tradeoffs">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Decision Record</p>
+              <h3>Accepted Limitations And Tradeoffs</h3>
+            </div>
+          </div>
+
+          <div class="decision-grid">
+            <article class="decision">
+              <span class="badge warn">Tenant</span>
+              <h4>Entra Logs Blocked</h4>
+              <p>`SigninLogs` and `AuditLogs` require tenant-level permissions in the university Entra tenant. The limitation is documented instead of hidden.</p>
+            </article>
+            <article class="decision">
+              <span class="badge warn">Cost</span>
+              <h4>Defender Standard Deferred</h4>
+              <p>Defender Standard plans are tracked as accepted lab tradeoffs and can be enabled when production cost assumptions are approved.</p>
+            </article>
+            <article class="decision">
+              <span class="badge info">Dev</span>
+              <h4>Policy In Audit Mode</h4>
+              <p>The policy initiative uses `DoNotEnforce` to prove governance coverage without blocking iteration in a student lab subscription.</p>
+            </article>
+            <article class="decision">
+              <span class="badge pass">Hygiene</span>
+              <h4>Temporary Resource Cleanup</h4>
+              <p>The Key Vault used for live KQL validation was deleted and purged after evidence capture.</p>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="evidence-dialog" id="evidenceDialog" aria-labelledby="dialogTitle">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow" id="dialogCategory">Evidence</p>
+          <h3 id="dialogTitle">Screenshot</h3>
+        </div>
+        <button class="icon-button" type="button" id="closeDialog" title="Close preview">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4 6.4 5Zm11.2 0L19 6.4 6.4 19 5 17.6 17.6 5Z" /></svg>
+        </button>
+      </div>
+      <img id="dialogImage" alt="" />
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
