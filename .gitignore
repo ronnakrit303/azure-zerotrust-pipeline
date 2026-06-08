@@ -29,7 +29,9 @@ policy/main.json
 
 # Logs, reports, and temporary files
 *.log
+*.sarif
 logs/
+reports/
 tmp/
 temp/
 .cache/

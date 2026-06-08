@@ -15,7 +15,7 @@ real scan/build target.
 | Sentinel detections | Implemented | `sentinel/detection-rules/*.kql`, `sentinel/workbooks/security-posture.json` |
 | Demo app target | Implemented | `app/Dockerfile`, `app/src/zerotrust_demo/`, `app/tests/` |
 | Security documentation | Implemented | `docs/architecture.md`, `docs/threat-model.md`, `docs/compliance-report.md`, `docs/kql-playbook.md` |
-| Local helper scripts | Planned | `scripts/` still contains placeholders |
+| Local helper scripts | Implemented | `scripts/setup-azure.sh`, `scripts/run-scans.sh`, `scripts/export-compliance.ps1` |
 
 ## Architecture
 
@@ -52,6 +52,8 @@ For the full design rationale, see `docs/architecture.md`.
 Local validation:
 
 - Azure CLI with Bicep support
+- Bash shell, such as Git Bash, WSL, Linux, or macOS, for `scripts/*.sh`
+- PowerShell 5.1+ or PowerShell 7+ for compliance evidence export
 - Python 3.12 or compatible Python 3
 - Git
 - Gitleaks
@@ -84,6 +86,18 @@ Clone and validate locally:
 ```powershell
 git clone <your-repo-url>
 cd azure-zerotrust-pipeline
+```
+
+Run the local helper script, skipping Docker if the Docker Desktop engine is not
+running:
+
+```bash
+bash scripts/run-scans.sh --skip-docker
+```
+
+Or run individual checks while debugging:
+
+```powershell
 
 az bicep build --file infra\main.bicep
 az bicep build --file policy\main.bicep
@@ -108,7 +122,40 @@ Invoke-WebRequest http://127.0.0.1:8080/healthz
 Invoke-WebRequest http://127.0.0.1:8080/api/v1/posture
 ```
 
+## Helper Scripts
+
+Local scan runner:
+
+```bash
+bash scripts/run-scans.sh
+bash scripts/run-scans.sh --skip-docker
+bash scripts/run-scans.sh --sarif --no-fail-fast
+```
+
+Azure setup validation. This checks login, provider state, Bicep build, validate,
+and what-if. It does not deploy resources:
+
+```bash
+bash scripts/setup-azure.sh --environment dev
+bash scripts/setup-azure.sh --environment prod --skip-what-if
+bash scripts/setup-azure.sh --environment dev --register-providers
+```
+
+Compliance evidence export. Generated files are written under `reports/`, which
+is ignored by Git because exports can contain subscription and resource IDs:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\export-compliance.ps1 -Environment dev -SkipAzure
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\export-compliance.ps1 -Environment dev -RunWhatIf
+```
+
 ## Validation Commands
+
+Run the full local pre-flight:
+
+```bash
+bash scripts/run-scans.sh --skip-docker
+```
 
 Bicep:
 
@@ -145,6 +192,12 @@ checkov --directory infra --framework bicep --quiet --soft-fail
 ## Azure Deployment
 
 Start with validation and what-if. These commands do not deploy resources:
+
+```bash
+bash scripts/setup-azure.sh --environment dev
+```
+
+Manual equivalent:
 
 ```powershell
 az login
@@ -269,7 +322,6 @@ python -X utf8 -m unittest discover -s app\tests -v
 
 ## Current Known Gaps
 
-- `scripts/` still needs real helper scripts.
 - Azure validate/what-if requires `az login` and a subscription.
 - Local Docker build requires Docker Desktop engine to be running.
 - Local Checkov requires Checkov to be installed; CI installs it automatically.
@@ -286,7 +338,7 @@ python -X utf8 -m unittest discover -s app\tests -v
 |-- pipeline/            # Azure DevOps pipeline and mirrored GitHub workflow templates
 |-- policy/              # Azure Policy definitions, assignment, remediation
 |-- sentinel/            # KQL detection rules and workbook JSON
-|-- scripts/             # Planned local/bootstrap helper scripts
+|-- scripts/             # Local scan, Azure validation, and compliance export helpers
 |-- .github/workflows/   # Active GitHub Actions workflows
 `-- README.md
 ```
