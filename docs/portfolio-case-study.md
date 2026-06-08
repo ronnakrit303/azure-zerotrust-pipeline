@@ -97,6 +97,28 @@ time because those would require a measured baseline and follow-up operating dat
 Instead, the portfolio evidence shows control coverage, validation pass rates, telemetry
 ingestion, detection behavior, and cleanup hygiene.
 
+## Impact Measurement Plan
+
+The next measurement layer separates validated technical outcomes from future impact
+claims. These impact claims are intentionally not presented as percentages until the
+lab has a baseline snapshot and at least one follow-up measurement period.
+
+| Impact area | Current evidence | Baseline required before claiming improvement | Future measurement method |
+|---|---|---|---|
+| Risk reduction | CI gates, Azure Policy assignment, Sentinel onboarding, and one live High severity KQL detection are validated. | A pre-control security scorecard showing missing gates, missing telemetry, open policy gaps, and detection coverage. | Compare control coverage, failed security findings, policy compliance, and detection coverage before and after controls are enabled. |
+| Cost reduction | Defender Standard is deferred by design, Log Analytics has a lab-sized footprint, and temporary Key Vault validation resources were purged. | Daily or monthly Azure Cost Management export before and after enabling additional paid controls. | Track subscription cost by service, workspace ingestion cost, Defender plan cost, and temporary-resource cleanup over time. |
+| Incident response time | The secrets rule produced a controlled High severity detection from real Key Vault telemetry. | A scheduled analytics rule and incident lifecycle timestamps for created, assigned, triaged, and closed incidents. | Measure detection-to-incident, incident-to-triage, and incident-to-close times across controlled validation incidents. |
+| Security posture improvement | The portfolio has measurable pass rates and telemetry validation results. | A repeatable scorecard taken before enabling controls and after each hardening phase. | Score security domains such as CI/CD, identity, governance, telemetry, detection, response, and cost hygiene on every validation cycle. |
+
+Recommended baseline artifacts:
+
+- Azure Cost Management export, scheduled daily or monthly to a storage account.
+- Microsoft Sentinel scheduled analytics rule with incident creation enabled for the
+  validated Key Vault secrets access detection.
+- Incident lifecycle evidence that records alert creation, assignment, triage, and
+  closure timestamps.
+- Security scorecard snapshots before and after control changes.
+
 ## Constraints And Tradeoffs
 
 - Entra ID `SigninLogs` and `AuditLogs` were not connected because the lab account is

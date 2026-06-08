@@ -34,6 +34,10 @@
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 3h14v18H5V3Zm3 4v2h8V7H8Zm0 4v2h8v-2H8Zm0 4v2h5v-2H8Z" /></svg>
             Evidence
           </a>
+          <a class="nav-item" href="#impact">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 19h14v2H5v-2Zm1-3h3V8H6v8Zm5 0h3V4h-3v12Zm5 0h3v-6h-3v6Z" /></svg>
+            Impact
+          </a>
           <a class="nav-item" href="#tradeoffs">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2 2 20h20L12 2Zm1 14h-2v2h2v-2Zm0-7h-2v5h2V9Z" /></svg>
             Tradeoffs
@@ -229,6 +233,48 @@
               baselines. The measured outcomes show validation coverage, telemetry,
               detection behavior, and cleanup hygiene.
             </p>
+          </div>
+        </section>
+
+        <section class="dashboard-band" id="impact" aria-label="Impact measurement plan">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Future Baselines</p>
+              <h3>Impact Measurement Plan</h3>
+            </div>
+          </div>
+
+          <div class="impact-grid">
+            <article class="impact-card">
+              <span class="badge info">Risk</span>
+              <h4>Risk Reduction</h4>
+              <p>Validated today through control coverage and live detection evidence. A percentage claim requires a pre-control scorecard and follow-up compliance or detection results.</p>
+            </article>
+            <article class="impact-card">
+              <span class="badge warn">Cost</span>
+              <h4>Cost Reduction</h4>
+              <p>Not claimed yet. The next baseline is a daily or monthly Azure Cost Management export that tracks service spend and Log Analytics ingestion over time.</p>
+            </article>
+            <article class="impact-card">
+              <span class="badge alert">Response</span>
+              <h4>Incident Response Time</h4>
+              <p>Needs a scheduled analytics rule and incident lifecycle timestamps for created, assigned, triaged, and closed incidents before improvement can be measured.</p>
+            </article>
+            <article class="impact-card">
+              <span class="badge pass">Posture</span>
+              <h4>Security Improvement</h4>
+              <p>Use repeated scorecard snapshots across CI/CD, identity, governance, telemetry, detection, response, and cleanup hygiene.</p>
+            </article>
+          </div>
+
+          <div class="baseline-strip" aria-label="Recommended baseline artifacts">
+            <span>Next evidence to collect</span>
+            <ul>
+              <li>Cost Management export</li>
+              <li>Scheduled Sentinel analytics rule</li>
+              <li>Incident lifecycle timestamps</li>
+              <li>Before and after scorecards</li>
+            </ul>
           </div>
         </section>
 

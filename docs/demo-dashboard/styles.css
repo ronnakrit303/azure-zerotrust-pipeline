@@ -314,6 +314,12 @@ svg {
   gap: 12px;
 }
 
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
 .outcome {
   min-height: 140px;
   padding: 16px;
@@ -358,6 +364,64 @@ svg {
   margin: 0;
   color: var(--muted);
   line-height: 1.5;
+}
+
+.impact-card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-height: 188px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.impact-card h4 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.impact-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.baseline-strip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid #c9d8e8;
+  background: #f4f8fc;
+}
+
+.baseline-strip span {
+  flex: 0 0 auto;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.baseline-strip ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.baseline-strip li {
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .lane,
@@ -588,7 +652,7 @@ svg {
   }
 
   .nav-list {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   .nav-item {
@@ -602,6 +666,7 @@ svg {
   .summary-grid,
   .lane-grid,
   .outcome-grid,
+  .impact-grid,
   .decision-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -632,9 +697,15 @@ svg {
   .summary-grid,
   .lane-grid,
   .outcome-grid,
+  .impact-grid,
   .evidence-grid,
   .decision-grid {
     grid-template-columns: 1fr;
+  }
+
+  .baseline-strip {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .nav-item {

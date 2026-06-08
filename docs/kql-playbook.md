@@ -45,7 +45,7 @@ true-positive validation event rather than a false positive.
 |---|---|---|---|
 | Lateral Movement Detection | Lateral Movement | T1021 | Implemented |
 | Privilege Escalation Alert | Privilege Escalation | T1098 | Implemented |
-| Secrets Exfiltration Monitor | Exfiltration | T1552 | Implemented |
+| Secrets Exfiltration Monitor | Credential Access | T1552 | Implemented |
 
 ## Analytics Rule Defaults
 
@@ -60,6 +60,14 @@ Recommended alert details:
 - Custom details: `Action`, `Severity`, operation counts, target resources, and correlation IDs when present.
 - Alert grouping: group by `AccountName`, `IPAddress`, and rule name for 1 hour during early testing.
 - Incident creation: enabled after each query has been tuned against workspace data.
+
+Scheduled rule helper:
+
+- Script: `scripts/create-sentinel-analytics-rule.ps1`.
+- Default rule: `AZZT - Key Vault Secrets Exfiltration Monitor (dev)`.
+- Default schedule: run every 15 minutes with a 1 day lookback.
+- Incident creation: enabled for the validated Key Vault secrets access detection.
+- MITRE mapping: `CredentialAccess` / `T1552`.
 
 ## Rules
 

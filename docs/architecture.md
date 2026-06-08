@@ -142,11 +142,13 @@ The deployment model is intentionally staged:
 | 2026-06-04 | Defender | Make Defender for Cloud plan configuration opt-in through parameters. | Defender Standard plans can incur cost and should be enabled intentionally. |
 | 2026-06-08 | IaC scanning | Accept Checkov Defender Standard findings as documented lab exceptions. | Defender Standard plans are defined in code but disabled by default to avoid unplanned Azure for Students cost. |
 | 2026-06-08 | Monitoring | Add `Microsoft.OperationsManagement` to the required provider list. | Sentinel onboarding can fail without this subscription provider registration. |
+| 2026-06-09 | Measurement | Add an impact measurement plan that separates validated technical outcomes from future business impact claims. | Avoids unsupported percentage claims until cost, incident lifecycle, and scorecard baselines exist. |
 | 2026-06-04 | Pipeline | Run Gitleaks first, then Semgrep, Trivy, Checkov, and MSDO. | Fails fast on secrets and keeps later security gates dependent on clean earlier stages. |
 | 2026-06-04 | Azure deployment | Use GitHub OIDC for Azure login and avoid stored client secrets. | Reduces secret management risk and aligns with workload identity federation. |
 | 2026-06-04 | Azure Policy | Start `dev` with audit effects and `DoNotEnforce`, and reserve deny/modify for `prod`. | Supports safe rollout and avoids blocking expected lab changes before validation. |
 | 2026-06-04 | Policy remediation | Use a policy assignment managed identity with Tag Contributor only when tag modify is enabled. | Keeps remediation scoped to the minimum role required for tag updates. |
 | 2026-06-04 | Sentinel | Standardize KQL outputs on `TimeGenerated`, `AccountName`, `IPAddress`, `Action`, and `Severity`. | Makes analytics rule mapping, workbook triage, and incident review consistent. |
+| 2026-06-09 | Sentinel | Add `scripts/create-sentinel-analytics-rule.ps1` to promote the validated Key Vault KQL rule into a scheduled Sentinel analytics rule. | Creates a repeatable path from live KQL validation to incident lifecycle measurement. |
 | 2026-06-04 | Application | Use a small Python stdlib HTTP API as the scan target. | Keeps the demo app dependency-light while still giving CI a real Docker and test target. |
 
 ## Operational Risks
