@@ -32,6 +32,13 @@ lateral movement and privilege escalation rules are therefore documented as impl
 and syntax-tested, but blocked from full live-data tuning until the tenant administrator
 grants an Entra role such as Security Administrator or exports the logs to the workspace.
 
+The secrets exfiltration rule was live-data validated with a temporary Key Vault test
+resource. Key Vault `AuditEvent` diagnostics were sent to the existing Log Analytics
+workspace, controlled `SecretGet` and `SecretList` operations were generated, and the
+rule produced one High severity detection with `OperationCount = 57`. The default
+thresholds are therefore retained for the lab because the alert represented an intended
+true-positive validation event rather than a false positive.
+
 ## Detection Rule Index
 
 | Rule | MITRE Tactic | Technique | Status |
