@@ -35,7 +35,7 @@ grants an Entra role such as Security Administrator or exports the logs to the w
 The secrets exfiltration rule was live-data validated with a temporary Key Vault test
 resource. Key Vault `AuditEvent` diagnostics were sent to the existing Log Analytics
 workspace, controlled `SecretGet` and `SecretList` operations were generated, and the
-rule produced one High severity detection with `OperationCount = 57`. The default
+rule produced one High severity detection with `OperationCount = 60`. The default
 thresholds are therefore retained for the lab because the alert represented an intended
 true-positive validation event rather than a false positive.
 

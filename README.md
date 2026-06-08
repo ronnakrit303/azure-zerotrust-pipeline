@@ -17,6 +17,11 @@ real scan/build target.
 | Security documentation | Implemented | `docs/architecture.md`, `docs/threat-model.md`, `docs/compliance-report.md`, `docs/kql-playbook.md` |
 | Local helper scripts | Implemented | `scripts/setup-azure.sh`, `scripts/run-scans.sh`, `scripts/export-compliance.ps1` |
 
+## Portfolio Case Study
+
+For a public, sanitized validation summary with redacted screenshots, see
+`docs/portfolio-case-study.md`.
+
 ## Architecture
 
 ```mermaid
