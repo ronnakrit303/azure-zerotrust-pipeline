@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Azure Zero Trust Case Study</title>
+    <link rel="stylesheet" href="doc-page.css" />
+  </head>
+  <body>
+    <div class="doc-shell">
+      <header class="doc-topbar">
+        <div class="doc-brand">
+          <div class="brand-mark" aria-hidden="true">ZT</div>
+          <div>
+            <strong>Azure Zero Trust</strong>
+            <span>Portfolio Case Study</span>
+          </div>
+        </div>
+        <nav class="nav-actions" aria-label="Document navigation">
+          <a href="index.html">Dashboard</a>
+          <a href="kql-playbook.html">KQL playbook</a>
+        </nav>
+      </header>
+
+      <section class="doc-hero">
+        <p class="eyebrow">DevSecOps Portfolio Lab</p>
+        <h1>Azure Zero Trust DevSecOps Case Study</h1>
+        <p>
+          A secure Azure delivery lab covering CI/CD security gates, GitHub OIDC
+          validation, Bicep what-if, Azure Policy governance, Microsoft Sentinel, and
+          live KQL detection testing.
+        </p>
+        <div class="stat-row" aria-label="Case study metrics">
+          <article class="stat"><span>CI gates</span><strong>5 / 5</strong></article>
+          <article class="stat"><span>Compliance export</span><strong>18 / 18</strong></article>
+          <article class="stat"><span>Scheduled alerts</span><strong>5</strong></article>
+          <article class="stat"><span>Incident state</span><strong>Closed</strong></article>
+        </div>
+      </section>
+
+      <main class="doc-grid">
+        <section class="doc-section">
+          <h2>Scope</h2>
+          <div class="two-col">
+            <ul>
+              <li>GitHub Actions CI security gates for secrets, SAST, container, IaC, and MSDO.</li>
+              <li>GitHub Actions CD authentication to Azure through OIDC federation.</li>
+              <li>Azure Bicep build and subscription-level what-if validation.</li>
+              <li>Azure Policy assignment in <code>DoNotEnforce</code> mode for dev.</li>
+            </ul>
+            <ul>
+              <li>Microsoft Sentinel onboarding backed by Log Analytics.</li>
+              <li>Azure Activity diagnostic ingestion into Log Analytics.</li>
+              <li>Key Vault <code>AuditEvent</code> ingestion and KQL detection validation.</li>
+              <li>Scheduled Sentinel rule, alert evidence, and incident lifecycle closure.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="doc-section">
+          <h2>Architecture And CI/CD Evidence</h2>
+          <p>
+            The dev environment includes a workload resource group, Log Analytics
+            workspace, Sentinel onboarding, a virtual network, and three NSGs. The policy
+            baseline is assigned at subscription scope in audit-style dev mode.
+          </p>
+          <div class="image-grid">
+            <figure class="image-card">
+              <button class="image-preview" type="button" data-full="../portfolio/assets/azure-rg-devsecops-dev-sea-resources.png" data-title="Dev resource group resources" aria-label="Preview Dev resource group resources">
+                <img src="../portfolio/assets/azure-rg-devsecops-dev-sea-resources.png" alt="Azure resource group resource list" />
+              </button>
+              <figcaption>Dev resource group resources.</figcaption>
+            </figure>
+            <figure class="image-card">
+              <button class="image-preview" type="button" data-full="../portfolio/assets/github-ci-security-success.png" data-title="CI Security workflow" aria-label="Preview CI Security workflow">
+                <img src="../portfolio/assets/github-ci-security-success.png" alt="GitHub CI security success" />
+              </button>
+              <figcaption>CI Security workflow passed 5 gates.</figcaption>
+            </figure>
+            <figure class="image-card">
+              <button class="image-preview" type="button" data-full="../portfolio/assets/github-cd-azure-what-if-success.png" data-title="CD Azure what-if" aria-label="Preview CD Azure what-if">
+                <img src="../portfolio/assets/github-cd-azure-what-if-success.png" alt="GitHub CD Azure what-if success" />
+              </button>
+              <figcaption>CD Azure what-if validated through OIDC.</figcaption>
+            </figure>
+            <figure class="image-card">
+              <button class="image-preview" type="button" data-full="../portfolio/assets/azure-policy-assignment-azzt-cis-dev-sea-detail.png" data-title="Azure Policy assignment detail" aria-label="Preview Azure Policy assignment detail">
+                <img src="../portfolio/assets/azure-policy-assignment-azzt-cis-dev-sea-detail.png" alt="Azure Policy assignment detail" />
+              </button>
+              <figcaption>Custom baseline assigned with DoNotEnforce.</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section class="doc-section">
+          <h2>Sentinel And KQL Validation</h2>
+          <p>
+            AzureActivity and Key Vault diagnostics were validated with real Log Analytics
+            rows. A temporary Key Vault generated controlled secret access telemetry, the
+            KQL rule produced High severity output, and a scheduled Sentinel analytics
+            rule generated SecurityAlert rows and incident 1340.
+          </p>
+          <div class="image-grid">
+            <figure class="image-card">
+              <button class="image-preview" type="button" data-full="../portfolio/assets/azure-sentinel-overview.png" data-title="Microsoft Sentinel overview" aria-label="Preview Microsoft Sentinel overview">
+                <img src="../portfolio/assets/azure-sentinel-overview.png" alt="Microsoft Sentinel overview" />
+              </button>
+              <figcaption>Sentinel onboarded to the dev workspace.</figcaption>
+            </figure>
+            <figure class="image-card">
+              <button class="image-preview" type="button" data-full="../portfolio/assets/azure-activity-log-ingestion.png" data-title="AzureActivity ingestion query" aria-label="Preview AzureActivity ingestion query">
+                <img src="../portfolio/assets/azure-activity-log-ingestion.png" alt="AzureActivity ingestion query" />
+              </button>
+              <figcaption>AzureActivity ingestion verified.</figcaption>
+            </figure>
+            <figure class="image-card">
+              <button class="image-preview" type="button" data-full="../portfolio/assets/azure-keyvault-auditevent-ingestion.png" data-title="Key Vault AuditEvent ingestion query" aria-label="Preview Key Vault AuditEvent ingestion query">
+                <img src="../portfolio/assets/azure-keyvault-auditevent-ingestion.png" alt="Key Vault AuditEvent ingestion query" />
+              </button>
+              <figcaption>Key Vault AuditEvent rows ingested.</figcaption>
+            </figure>
+            <figure class="image-card">
+              <button class="image-preview" type="button" data-full="../portfolio/assets/kql-secrets-exfiltration-detection.png" data-title="Secrets exfiltration KQL detection" aria-label="Preview Secrets exfiltration KQL detection">
+                <img src="../portfolio/assets/kql-secrets-exfiltration-detection.png" alt="Secrets exfiltration KQL detection" />
+              </button>
+              <figcaption>KQL detection returned High severity with 60 operations.</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section class="doc-section">
+          <h2>Measured Outcomes</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Measurement</th><th>Result</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>CI security gates passed</td><td>5 / 5, 100%</td></tr>
+                <tr><td>CD validation jobs passed</td><td>2 / 2, 100%</td></tr>
+                <tr><td>Final compliance evidence checks</td><td>18 / 18, 100%</td></tr>
+                <tr><td>Checkov failed findings after documented exceptions</td><td>0</td></tr>
+                <tr><td>Azure resources in dev resource group</td><td>6</td></tr>
+                <tr><td>AzureActivity rows ingested during validation</td><td>6</td></tr>
+                <tr><td>Key Vault AuditEvent rows ingested during validation</td><td>121</td></tr>
+                <tr><td>Secret operations observed by detection</td><td>60, 3x the threshold of 20</td></tr>
+                <tr><td>Scheduled SecurityAlert rows</td><td>5 High severity alerts</td></tr>
+                <tr><td>Alert-to-incident creation</td><td>Approximately 12 seconds</td></tr>
+                <tr><td>Incident lifecycle</td><td>Incident 1340 triaged, assigned, and closed as benign positive</td></tr>
+                <tr><td>Temporary validation resource cleanup</td><td>Deleted and purged</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="doc-section">
+          <h2>Impact Measurement Plan</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Area</th><th>Current evidence</th><th>Next baseline</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Risk reduction</td>
+                  <td>CI gates, policy assignment, Sentinel onboarding, and High severity detection validated.</td>
+                  <td>Pre-control scorecard and follow-up control coverage snapshots.</td>
+                </tr>
+                <tr>
+                  <td>Cost reduction</td>
+                  <td>Defender Standard deferred by design and temporary Key Vault purged.</td>
+                  <td>Daily or monthly Azure Cost Management export.</td>
+                </tr>
+                <tr>
+                  <td>Incident response time</td>
+                  <td>One controlled incident has event, alert, incident, triage, and closure timestamps.</td>
+                  <td>Repeated lifecycle samples across controlled validation incidents.</td>
+                </tr>
+                <tr>
+                  <td>Security posture improvement</td>
+                  <td>Pass rates and telemetry validation results are measurable.</td>
+                  <td>Repeatable scorecards across CI/CD, identity, governance, telemetry, and response.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="doc-section">
+          <h2>Accepted Limitations And Tradeoffs</h2>
+          <ul>
+            <li>Entra ID <code>SigninLogs</code> and <code>AuditLogs</code> are blocked by university tenant permissions.</li>
+            <li>Defender Standard plans are deferred as a cost-conscious lab tradeoff.</li>
+            <li>Conditional Access automation remains a production hardening step.</li>
+            <li>Rule runs Preview had no records yet, so SecurityAlert rows are used as substitute evidence.</li>
+            <li>Raw incident and alert screenshots remain in <code>reports/</code> and must be redacted before public use.</li>
+          </ul>
+        </section>
+      </main>
+
+      <dialog class="image-dialog" id="imageDialog" aria-labelledby="imageDialogTitle">
+        <div class="dialog-head">
+          <h3 id="imageDialogTitle">Evidence screenshot</h3>
+          <button class="dialog-close" type="button" id="closeImageDialog" aria-label="Close preview">x</button>
+        </div>
+        <img id="imageDialogPreview" alt="" />
+      </dialog>
+    </div>
+    <script src="doc-page.js"></script>
+  </body>
+</html>

@@ -566,6 +566,37 @@ svg {
   object-fit: cover;
 }
 
+.evidence-card .evidence-placeholder {
+  display: grid;
+  min-height: 174px;
+  place-items: center;
+  gap: 8px;
+  padding: 18px;
+  background:
+    linear-gradient(135deg, rgba(20, 102, 184, 0.08), rgba(19, 138, 82, 0.08)),
+    #ffffff;
+  color: var(--ink);
+  cursor: default;
+}
+
+.evidence-placeholder span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.evidence-placeholder strong {
+  font-size: 20px;
+}
+
+.evidence-placeholder small {
+  max-width: 100%;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
 .evidence-copy {
   display: grid;
   gap: 6px;

@@ -57,11 +57,11 @@
             <h2>DevSecOps, governance, and Sentinel telemetry dashboard</h2>
           </div>
           <div class="topbar-actions" aria-label="Document links">
-            <a class="icon-link" href="../portfolio-case-study.md" title="Open case study">
+            <a class="icon-link" href="case-study.html" title="Open case study">
               <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z" /></svg>
               Case study
             </a>
-            <a class="icon-link" href="../kql-playbook.md" title="Open KQL playbook">
+            <a class="icon-link" href="kql-playbook.html" title="Open KQL playbook">
               <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16v14H4V5Zm2 2v10h12V7H6Zm2 2h3v2H8V9Zm0 4h8v2H8v-2Zm5-4h3v2h-3V9Z" /></svg>
               KQL playbook
             </a>
@@ -86,8 +86,8 @@
           </article>
           <article class="metric pass">
             <span class="metric-label">Sentinel</span>
-            <strong>Onboarded</strong>
-            <span>Workspace connected</span>
+            <strong>Rule active</strong>
+            <span>Incident closed</span>
           </article>
           <article class="metric pass">
             <span class="metric-label">AzureActivity</span>
@@ -97,7 +97,7 @@
           <article class="metric alert">
             <span class="metric-label">KQL Detection</span>
             <strong>High</strong>
-            <span>60 secret operations</span>
+            <span>60 ops, 5 alerts</span>
           </article>
         </section>
 
@@ -168,6 +168,9 @@
                 <li>AzureActivity ingestion verified</li>
                 <li>Key Vault AuditEvent ingested</li>
                 <li>Secrets exfiltration rule fired</li>
+                <li>Scheduled analytics rule enabled</li>
+                <li>SecurityAlert evidence captured</li>
+                <li>Incident 1340 triaged and closed</li>
                 <li>Temporary Key Vault purged</li>
               </ul>
             </article>
@@ -196,7 +199,7 @@
             <article class="outcome">
               <span>Compliance export</span>
               <strong>18 / 18</strong>
-              <p>100% evidence checks passed in the final export.</p>
+              <p>100% evidence checks passed in final export dev-20260608T231339Z.</p>
             </article>
             <article class="outcome">
               <span>Checkov failures</span>
@@ -222,6 +225,26 @@
               <span>Detection threshold</span>
               <strong>3x</strong>
               <p>60 secret operations versus a threshold of 20.</p>
+            </article>
+            <article class="outcome">
+              <span>Scheduled alerts</span>
+              <strong>5</strong>
+              <p>High severity SecurityAlert rows from ASI Scheduled Alerts.</p>
+            </article>
+            <article class="outcome">
+              <span>Alert to incident</span>
+              <strong>12 sec</strong>
+              <p>Measured from SecurityAlert creation to Sentinel incident creation.</p>
+            </article>
+            <article class="outcome">
+              <span>Incident lifecycle</span>
+              <strong>Closed</strong>
+              <p>Incident 1340 was assigned, triaged, and closed as benign positive.</p>
+            </article>
+            <article class="outcome">
+              <span>Cleanup hygiene</span>
+              <strong>100%</strong>
+              <p>Temporary Key Vault validation resource was deleted and purged.</p>
             </article>
           </div>
 
@@ -258,7 +281,7 @@
             <article class="impact-card">
               <span class="badge alert">Response</span>
               <h4>Incident Response Time</h4>
-              <p>Needs a scheduled analytics rule and incident lifecycle timestamps for created, assigned, triaged, and closed incidents before improvement can be measured.</p>
+              <p>Started with one controlled incident lifecycle. A response improvement claim still needs repeated incidents and a pre-control operating baseline.</p>
             </article>
             <article class="impact-card">
               <span class="badge pass">Posture</span>
@@ -271,8 +294,8 @@
             <span>Next evidence to collect</span>
             <ul>
               <li>Cost Management export</li>
-              <li>Scheduled Sentinel analytics rule</li>
-              <li>Incident lifecycle timestamps</li>
+              <li>Rule runs history after preview data populates</li>
+              <li>Repeated incident lifecycle samples</li>
               <li>Before and after scorecards</li>
             </ul>
           </div>

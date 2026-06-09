@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Azure Zero Trust KQL Playbook</title>
+    <link rel="stylesheet" href="doc-page.css" />
+  </head>
+  <body>
+    <div class="doc-shell">
+      <header class="doc-topbar">
+        <div class="doc-brand">
+          <div class="brand-mark" aria-hidden="true">KQL</div>
+          <div>
+            <strong>Microsoft Sentinel</strong>
+            <span>KQL Playbook</span>
+          </div>
+        </div>
+        <nav class="nav-actions" aria-label="Document navigation">
+          <a href="index.html">Dashboard</a>
+          <a href="case-study.html">Case study</a>
+        </nav>
+      </header>
+
+      <section class="doc-hero">
+        <p class="eyebrow">Detection Engineering</p>
+        <h1>KQL Playbook</h1>
+        <p>
+          Detection notes for the Microsoft Sentinel rules in
+          <code>sentinel/detection-rules/</code>, including data sources, validation
+          status, scheduling defaults, and response guidance.
+        </p>
+        <div class="stat-row" aria-label="KQL validation metrics">
+          <article class="stat"><span>AzureActivity</span><strong>6 rows</strong></article>
+          <article class="stat"><span>AuditEvent</span><strong>121 rows</strong></article>
+          <article class="stat"><span>Scheduled alerts</span><strong>5 High</strong></article>
+          <article class="stat"><span>Incident 1340</span><strong>Closed</strong></article>
+        </div>
+      </section>
+
+      <main class="doc-grid">
+        <section class="doc-section">
+          <h2>Data Sources</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Table</th><th>Purpose</th><th>Current lab status</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>AzureActivity</code></td><td>Subscription control-plane events.</td><td><span class="badge pass">Connected</span> 6 rows validated.</td></tr>
+                <tr><td><code>AzureDiagnostics</code></td><td>Key Vault AuditEvent diagnostics.</td><td><span class="badge pass">Connected</span> 121 rows validated during controlled test.</td></tr>
+                <tr><td><code>SecurityAlert</code></td><td>Scheduled rule alert evidence.</td><td><span class="badge pass">Connected</span> 5 High severity alerts from ASI Scheduled Alerts.</td></tr>
+                <tr><td><code>SigninLogs</code></td><td>Identity sign-in behavior and password spray patterns.</td><td><span class="badge warn">Blocked</span> Requires tenant-level Entra permission.</td></tr>
+                <tr><td><code>AuditLogs</code></td><td>Role management, PIM, consent, and ownership changes.</td><td><span class="badge warn">Blocked</span> Requires tenant-level Entra permission.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="doc-section">
+          <h2>Lab Validation Status</h2>
+          <p>
+            <code>AzureActivity</code> is connected through diagnostic setting
+            <code>azzt-activity-dev-sea</code>. Entra ID <code>SigninLogs</code> and
+            <code>AuditLogs</code> are not connected because the account does not have
+            university tenant permission to read or configure
+            <code>microsoft.aadiam</code> diagnostic settings.
+          </p>
+          <p>
+            The secrets monitor was validated with a temporary Key Vault test resource.
+            Controlled <code>SecretGet</code> and <code>SecretList</code> operations
+            generated <code>OperationCount = 60</code>, exceeding the threshold of 20.
+            A scheduled analytics rule later generated 5 High severity
+            <code>SecurityAlert</code> rows and incident 1340, which was triaged and
+            closed as benign positive.
+          </p>
+        </section>
+
+        <section class="doc-section">
+          <h2>Detection Rule Index</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Rule</th><th>MITRE tactic</th><th>Technique</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Lateral Movement Detection</td><td>Lateral Movement</td><td>T1021</td><td>Implemented, blocked from live tuning by missing SigninLogs.</td></tr>
+                <tr><td>Privilege Escalation Alert</td><td>Privilege Escalation</td><td>T1098</td><td>Implemented, blocked from live tuning by missing AuditLogs.</td></tr>
+                <tr><td>Secrets Exfiltration Monitor</td><td>Credential Access</td><td>T1552</td><td>Live-data validated and scheduled rule enabled.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="doc-section">
+          <h2>Analytics Rule Defaults</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Rule</th><th>Frequency</th><th>Lookup</th><th>Severity</th><th>Entity mappings</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Lateral Movement Detection</td><td>15 minutes</td><td>1 day</td><td>Dynamic</td><td><code>AccountName</code> to Account, <code>IPAddress</code> to IP.</td></tr>
+                <tr><td>Privilege Escalation Alert</td><td>15 minutes</td><td>1 day</td><td>Dynamic</td><td><code>AccountName</code> to Account, <code>IPAddress</code> to IP.</td></tr>
+                <tr><td>Secrets Exfiltration Monitor</td><td>15 minutes</td><td>1 day</td><td>Dynamic, High for validation event</td><td><code>AccountName</code> to Account, <code>IPAddress</code> to IP.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="doc-section">
+          <h2>Secrets Exfiltration Monitor</h2>
+          <p>
+            Detects high-volume Key Vault secret, key, or certificate read/list activity
+            and backup operations from the same account and IP address.
+          </p>
+          <pre><code>// Tactic: Credential Access | Technique: T1552
+let Lookback = 1d;
+let Window = 15m;
+let SecretOperationThreshold = 20;
+let VaultThreshold = 2;</code></pre>
+          <ul>
+            <li>Default tuning: <code>SecretOperationThreshold = 20</code>, <code>VaultThreshold = 2</code>, <code>Window = 15m</code>.</li>
+            <li>Expected entities: map <code>AccountName</code> to Account and <code>IPAddress</code> to IP.</li>
+            <li>False positives: backup jobs, deployment pipelines, certificate renewal, inventory scripts, or incident response collection.</li>
+            <li>Response: restrict identity, rotate affected secrets, review Key Vault RBAC, and add allowlists only for approved automation.</li>
+          </ul>
+        </section>
+
+        <section class="doc-section">
+          <h2>SecurityAlert Substitute Evidence</h2>
+          <p>
+            Rule runs Preview did not have records yet, so the lab uses
+            <code>SecurityAlert</code> as proof that the scheduled analytics rule created
+            alerts.
+          </p>
+          <pre><code>SecurityAlert
+| where TimeGenerated &gt; ago(24h)
+| where AlertName == "AZZT - Key Vault Secrets Exfiltration Monitor (dev)"
+| project TimeGenerated, AlertName, AlertSeverity, Status, ProviderName, SystemAlertId
+| order by TimeGenerated desc</code></pre>
+        </section>
+
+        <section class="doc-section">
+          <h2>Validation Checklist</h2>
+          <ul>
+            <li>Confirm <code>AzureActivity</code> is connected for subscription activity.</li>
+            <li>Enable Key Vault diagnostic settings before relying on the secrets monitor.</li>
+            <li>Run each KQL file in Logs with the expected time range.</li>
+            <li>Confirm each query returns <code>TimeGenerated</code>, <code>AccountName</code>, <code>IPAddress</code>, <code>Action</code>, and <code>Severity</code>.</li>
+            <li>Create scheduled analytics rules only after each query has been validated.</li>
+            <li>Track alert, incident, triage, assignment, and closure timestamps for response measurement.</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

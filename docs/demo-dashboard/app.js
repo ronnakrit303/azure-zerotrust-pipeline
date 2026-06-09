@@ -48,9 +48,33 @@ const evidenceItems = [
     image: "../portfolio/assets/kql-secrets-exfiltration-detection.png",
   },
   {
+    title: "Scheduled analytics rule",
+    category: "Sentinel",
+    description: "High severity scheduled rule is enabled for the Key Vault secrets monitor.",
+    evidencePath: "reports/portfolio-evidence/screenshots/sentinel-scheduled-analytics-rule-created.png",
+  },
+  {
+    title: "SecurityAlert evidence",
+    category: "Sentinel",
+    description: "SecurityAlert returned 5 High severity alerts from ASI Scheduled Alerts.",
+    evidencePath: "reports/portfolio-evidence/screenshots/sentinel-securityalert-keyvault-rule.png",
+  },
+  {
+    title: "Alert detail",
+    category: "Sentinel",
+    description: "Alert detail shows High severity, Credential Access, entities, and analytics rule name.",
+    evidencePath: "reports/portfolio-evidence/screenshots/sentinel-alert-detail-keyvault-secrets.png",
+  },
+  {
+    title: "Incident lifecycle",
+    category: "Sentinel",
+    description: "Incident 1340 was assigned, triaged, and closed as benign positive after validation.",
+    evidencePath: "reports/portfolio-evidence/screenshots/sentinel-incident-closed-benign-positive.png",
+  },
+  {
     title: "Compliance export summary",
     category: "Compliance",
-    description: "Compliance evidence export produced passing local, Azure, Bicep, and what-if checks.",
+    description: "Final export dev-20260608T231339Z produced 18 of 18 passing evidence checks.",
     image: "../portfolio/assets/compliance-export-summary.png",
   },
 ];
@@ -68,17 +92,36 @@ function renderEvidence() {
   evidenceItems.forEach((item) => {
     const article = document.createElement("article");
     article.className = "evidence-card";
-    article.dataset.search = `${item.title} ${item.category} ${item.description}`.toLowerCase();
+    article.dataset.search =
+      `${item.title} ${item.category} ${item.description} ${item.evidencePath ?? ""}`.toLowerCase();
 
     const previewButton = document.createElement("button");
     previewButton.type = "button";
     previewButton.setAttribute("aria-label", `Preview ${item.title}`);
 
-    const image = document.createElement("img");
-    image.src = item.image;
-    image.alt = item.title;
-    image.loading = "lazy";
-    previewButton.append(image);
+    if (item.image) {
+      const image = document.createElement("img");
+      image.src = item.image;
+      image.alt = item.title;
+      image.loading = "lazy";
+      previewButton.append(image);
+
+      previewButton.addEventListener("click", () => {
+        dialogTitle.textContent = item.title;
+        dialogCategory.textContent = item.category;
+        dialogImage.src = item.image;
+        dialogImage.alt = item.title;
+        dialog.showModal();
+      });
+    } else {
+      previewButton.className = "evidence-placeholder";
+      previewButton.disabled = true;
+      previewButton.innerHTML = `
+        <span>${item.category}</span>
+        <strong>Local evidence</strong>
+        <small>${item.evidencePath}</small>
+      `;
+    }
 
     const copy = document.createElement("div");
     copy.className = "evidence-copy";
@@ -87,14 +130,6 @@ function renderEvidence() {
       <h4>${item.title}</h4>
       <p>${item.description}</p>
     `;
-
-    previewButton.addEventListener("click", () => {
-      dialogTitle.textContent = item.title;
-      dialogCategory.textContent = item.category;
-      dialogImage.src = item.image;
-      dialogImage.alt = item.title;
-      dialog.showModal();
-    });
 
     article.append(previewButton, copy);
     fragment.append(article);
