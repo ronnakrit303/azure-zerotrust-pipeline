@@ -51,25 +51,31 @@ const evidenceItems = [
     title: "Scheduled analytics rule",
     category: "Sentinel",
     description: "High severity scheduled rule is enabled for the Key Vault secrets monitor.",
-    evidencePath: "reports/portfolio-evidence/screenshots/sentinel-scheduled-analytics-rule-created.png",
+    image: "../portfolio/assets/sentinel-scheduled-analytics-rule-created.png",
   },
   {
     title: "SecurityAlert evidence",
     category: "Sentinel",
     description: "SecurityAlert returned 5 High severity alerts from ASI Scheduled Alerts.",
-    evidencePath: "reports/portfolio-evidence/screenshots/sentinel-securityalert-keyvault-rule.png",
+    image: "../portfolio/assets/sentinel-securityalert-keyvault-rule.png",
   },
   {
     title: "Alert detail",
     category: "Sentinel",
     description: "Alert detail shows High severity, Credential Access, entities, and analytics rule name.",
-    evidencePath: "reports/portfolio-evidence/screenshots/sentinel-alert-detail-keyvault-secrets.png",
+    image: "../portfolio/assets/sentinel-alert-detail-keyvault-secrets.png",
+  },
+  {
+    title: "Incident triage state",
+    category: "Sentinel",
+    description: "The generated incident was assigned and moved into active triage.",
+    image: "../portfolio/assets/sentinel-incident-triaged-active.png",
   },
   {
     title: "Incident lifecycle",
     category: "Sentinel",
     description: "Incident 1340 was assigned, triaged, and closed as benign positive after validation.",
-    evidencePath: "reports/portfolio-evidence/screenshots/sentinel-incident-closed-benign-positive.png",
+    image: "../portfolio/assets/sentinel-incident-closed-benign-positive.png",
   },
   {
     title: "Compliance export summary",
@@ -92,36 +98,25 @@ function renderEvidence() {
   evidenceItems.forEach((item) => {
     const article = document.createElement("article");
     article.className = "evidence-card";
-    article.dataset.search =
-      `${item.title} ${item.category} ${item.description} ${item.evidencePath ?? ""}`.toLowerCase();
+    article.dataset.search = `${item.title} ${item.category} ${item.description}`.toLowerCase();
 
     const previewButton = document.createElement("button");
     previewButton.type = "button";
     previewButton.setAttribute("aria-label", `Preview ${item.title}`);
 
-    if (item.image) {
-      const image = document.createElement("img");
-      image.src = item.image;
-      image.alt = item.title;
-      image.loading = "lazy";
-      previewButton.append(image);
+    const image = document.createElement("img");
+    image.src = item.image;
+    image.alt = item.title;
+    image.loading = "lazy";
+    previewButton.append(image);
 
-      previewButton.addEventListener("click", () => {
-        dialogTitle.textContent = item.title;
-        dialogCategory.textContent = item.category;
-        dialogImage.src = item.image;
-        dialogImage.alt = item.title;
-        dialog.showModal();
-      });
-    } else {
-      previewButton.className = "evidence-placeholder";
-      previewButton.disabled = true;
-      previewButton.innerHTML = `
-        <span>${item.category}</span>
-        <strong>Local evidence</strong>
-        <small>${item.evidencePath}</small>
-      `;
-    }
+    previewButton.addEventListener("click", () => {
+      dialogTitle.textContent = item.title;
+      dialogCategory.textContent = item.category;
+      dialogImage.src = item.image;
+      dialogImage.alt = item.title;
+      dialog.showModal();
+    });
 
     const copy = document.createElement("div");
     copy.className = "evidence-copy";
